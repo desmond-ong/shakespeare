@@ -14,3 +14,7 @@ Thumbs.db
 *.log
 *.synctex.gz
 *.thm
+*.bbl
+*.blg
+
+shakespeare_cogsci.pdf
