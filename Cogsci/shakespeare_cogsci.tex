@@ -82,7 +82,10 @@ Keywords
 
 %Talk about Malle's Cause vs. Reason. Intentional vs unintentional behavior
 
+\textit{Basically, no one has really studied lay explanations of emotion-driven behavior. If anything, behavior driven by emotions are couched as ``unintentional", and sometimes, ``irrational"}
 \red{[TODO: more setup]}
+
+
 
 
 One hypothesis is that in our lay theories of behavior, there are two distinct processes that result in two types of behavioral responses (see Fig. \ref{ModelsOfBehaviorFig}a). The first of these processes is a rational decision making process in which an agent has a set of goals (``desires"), and a set of ideas on how to achieve those goals (often termed ``beliefs"). The agent then forms an intention to act upon his beliefs to achieve his desires, resulting in (intentional) action, as part of a ``belief-desire psychology" \cite{Dennett1989, Gopnik1997, Heider1958, Malle2011, Searle2001}. The second process, by contrast, relies on mere causality or ``impersonal causality" \cite{Heider1958}, and results in a second type of behavioral response. These behaviors could be caused by external situational factors, or as is often implicitly assumed by theories of folk psychology, the agent's emotions. Here, we make a distinction here between emotional expressions on one hand (e.g., crying), assumed to be caused only by emotions, and other unintentional behavior on the other (e.g., slipping on ice, snoring) that could be due to situational factors, and possibly emotions as well. Notably, in these theories of folk psychology, there is no place for emotions in the ``rational" decision making process that humans reason with when explaining the actions of others.
@@ -122,13 +125,12 @@ In order to test this, we elicited what types of behavior were most likely given
 % Expt 1b) Generate cause of Actions. Coded into emotions, beliefs, situational factors, etc.
 
 \subsubsection{Participants and Procedures.} 
-We recruited 100 participants through Amazon's Mechanical Turk (AMT). Participants saw statements of the form ``Bob \underline{\hspace{3em}} because he was [\textbf{emotion}]", and were asked to give sentence completions. The presented \textbf{emotion} was one of: \{happy, calm, anger, sad, surprised\}\footnote{We chose a high-arousal positive valence (``happy"), a low-arousal positive valence (``calm"), a high-arousal negative valence (``anger"), a low-arousal negative valence (``sad"), and a high-arousal neutral valence (``surprised") emotion.}. On each page, participants saw only one emotion, and gave 5 different completions (for a total of 25 completions). The emotions were presented in a random order; names were randomized on every sentence.
+We recruited 100 participants (99\% had English as their native language) through Amazon's Mechanical Turk (AMT). Participants saw statements of the form ``Bob \underline{\hspace{3em}} because he was [\textbf{emotion}]", and were asked to give sentence completions. The presented \textbf{emotion} was one of: \{happy, calm, anger, sad, surprised\}\footnote{We chose a high-arousal positive valence (``happy"), a low-arousal positive valence (``calm"), a high-arousal negative valence (``anger"), a low-arousal negative valence (``sad"), and a high-arousal neutral valence (``surprised") emotion.}. On each page, participants saw only one emotion, and gave 5 different completions (for a total of 25 completions). The emotions were presented in a random order; names were randomized on every sentence.
 
-% do we use the counterfactual judgments?
 After participants had given completions to all 5 emotions, they were then presented their answers, and asked to rate the likelihood of the counterfactual: ``You wrote that `\textit{Bob [cried] because he was [sad]}'. If Bob was not feeling [sad], would he still have [cried]?" Participants gave responses on a 7 point Likert scale from ``Very Unlikely" to ``Very Likely". 
 
 
-%\multirow{2}{*}{text}
+
 
 \subsubsection{Results.} 
 Similar free-responses were grouped together (e.g., ``smiled", ``smiled widely", and ``beamed"). The top 5 responses, with nomination counts, for each emotion are given in Table \ref{Study1aResultsTable}. Many of the responses for Anger were of the form ``hit X", where X is an object or person. Note that, as expected, the majority of these top responses would easily be judged to be ``emotional expressions": some notable exceptions are ``killed himself\footnote{It is unfortunate that this is one of the modal responses for what an agent will do when he is sad...}", ``slept", and ``sat down".
@@ -151,7 +153,7 @@ cried: 21 & sighed: 10 & yelled: 13 & cursed: 12 & smiled: 23 \\
 \label{Study1aResultsTable}
 \end{table}
 
-
+%\multirow{2}{*}{text}
 
 The more often a particular action $a$ is nominated for emotion $e$, presumably, the more characteristic is action $a$ of emotion $e$. Hence, we should expect that these commonly nominated actions $a$ would be less likely to happen in the absence of emotion $e$. In order to test this, we regressed participants' counterfactual likelihood ratings (i.e., how likely is the action to occur if the emotion was absent, $P(A | \neg E)$) against the frequency of that action being nominated across the sample, with random intercepts by participant and emotion. We find that, across all emotions, the more frequently an action is nominated, the less likely participants rate it to occur in the absence of the emotion $(b = -0.0084, 95\% \text{ CI}: [-0.0108, -0.0060], t=-6.82, p<0.001$; See Fig. \ref{Study1aResultsFig}). Thus, the modal nominated actions are judged less likely to occur in the absence of the corresponding emotions, and might thus be seen as more characteristic of their corresponding emotions: we shall use this result in Study 1b.
 
@@ -172,13 +174,13 @@ The more often a particular action $a$ is nominated for emotion $e$, presumably,
 
 
 \subsubsection{Participants and Procedures.} 
-In a similar manner to Study 1a, we recruited 100 participants through Amazon's Mechanical Turk (AMT). This time, participants saw statements of the form ``Bob [\textbf{action}] because \underline{\hspace{3em}}" (i.e., the reverse of Study 1a), and were asked to complete the sentence. The presented \textbf{action} was one of fifteen possible actions drawn from the most popular nominations from Study 1a (i.e., the 15 unique actions in Table \ref{Study1aResultsTable}: ``punched the wall" was used in place of ``hit X"). Participants gave 1 completion per action and saw the actions in a random order.
+In a similar manner to Study 1a, we recruited 100 participants through AMT (98\% had English as their native language). This time, participants saw statements of the form ``Bob [\textbf{action}] because \underline{\hspace{3em}}" (i.e., the reverse of Study 1a), and were asked to complete the sentence. The presented \textbf{action} was one of fifteen possible actions drawn from the most popular nominations from Study 1a (i.e., the 15 unique actions in Table \ref{Study1aResultsTable}: ``punched the wall" was used in place of ``hit X"). Participants gave 1 completion per action and saw the actions in a random order.
 % do we use the counterfactual judgments?
 
 \subsubsection{Results.} 
-The free-response completions were coded into one of five categories: (a) ``\textbf{Emotion}" (if there was a mention of an emotion word), (b) ``\textbf{Cause of Emotion}" (if there was a mention of an event that would cause an emotion, e.g., ``his dog died"), (c) ``\textbf{Physical state}" (if the explanation references a physical state like tiredness or pain), (d) ``\textbf{Mental state}" (if the explanation references a desire or a belief); (e) ``\textbf{Situation}" (for enabling and other situational factors). 
+The free-response completions were coded into one of five categories: (a) ``\textbf{Emotion}" (if there was a mention of an emotion word), (b) ``\textbf{Cause of Emotion}" (if there was a mention of an event that would cause an emotion, e.g., ``his dog died"), (c) ``\textbf{Physical state}" (if the explanation referenced a physical state like tiredness or pain), (d) ``\textbf{Mental state}" (if the explanation referenced a desire or a belief); (e) ``\textbf{Situation}" (for enabling and other situational factors). 
 
-The distribution of coded free-responses is given in Figure \ref{Study1bResultsFig}. \red{[TODO: write this next part more nicely and maybe some stats]} basically we should expect all explanations to be Emotion (and maybe + Cause of Emotion), but we see a huge range of responses across the board, invoking physical and mental state attributions, as well as other situational factors.
+The distribution of coded free-responses is given in Figure \ref{Study1bResultsFig}. If the actions generated from Study 1a were characteristic of those emotions, and if they could only have been caused by emotions (i.e., Fig. \ref{ModelsOfBehaviorFig}a), then we should expect the vast majority of the explanations to be due to emotions, or to upstream causes of emotions\footnote{``Because he is sad" is a somewhat unsatisfying explanation to ``why is he crying?" in conversation, and often begs the question ``well, so what made him sad?". People often give Causes of Emotion as explanations for (obvious) emotions, and so we decided to code specifically for these.}. However, we see that in fact, only 40.7\% of explanations appeal to an Emotion, and 51.7\% appeal to an Emotion or to a Cause of an Emotion. There are many other references to Physical states (e.g. physical pain as a cause for ``cursing" or ``yelling"; fatigue as a cause of ``sat down" or ``slept"), or to Mental states (e.g. a belief or a desire). Thus, it seems very likely that lay people's judgments of emotion-caused actions are not, in fact, predominantly caused only by emotions, which might support a more parsimonious model, as in Figure \ref{ModelsOfBehaviorFig}c. We test this model more precisely in Study 2.
 
 \begin{figure}[htb!]
 \begin{center}\includegraphics[width=1\columnwidth]{images/study1b_codePlot.pdf}\end{center}
@@ -187,17 +189,18 @@ The distribution of coded free-responses is given in Figure \ref{Study1bResultsF
 \end{figure}
 
 
-\section{Study 2: }
+\section{Study 2: Rating explanations for actions}
 
+In Study 1a/b, we examined participants' judgments of actions from several emotions, and we did not impose any formal structure on the type of actions that people generated (e.g., whether they were intentional actions or emotional expressions). In Study 2, we sought to test Figure \ref{ModelsOfBehaviorFig}c in a more hypothesis driven manner. First, we chose a set of actions (that span Intentional Actions, Emotional Expressions, and Unintentional Behavior), and specifically elicited Belief, Desire, Emotion, and Situational Factor explanations for these actions. We then collected, on a separate sample, ratings on the modal responses to each of these explanations. Under Figure \ref{ModelsOfBehaviorFig}c, we might hypothesize that (1) Beliefs and Desires will be rated highest as causes for Intentional Actions, although Emotion ratings will also be high, (2) Emotion ratings will be highest for Emotional Expressions, and ratings of Beliefs and Desires will also be high, and (3) For Unintentional Behavior, we should see high ratings for Situational Factor causes, and low ratings on other types of causes.
 
-\subsubsection{Participants and Procedures.} 
-
+\subsection{Generating lay explanations.} 
+To generate plausible lay explanations of behavior, we recruited 100 participants through AMT (97\% had English as their native language; 1\% did not report). Participants read about four different types of explanations for behavior: \textbf{thoughts} (i.e., beliefs about the state of the world), \textbf{emotions}, \textbf{aims} (i.e., desires), and \textbf{situational causes}. They read simple lay definitions of these four types of causes, and read examples of each (e.g. ``Bob moved to Iowa because he thinks people are nice there"). Then, participants saw statements and gave four different explanations for each statement, e.g. ``Bob [\textbf{action}] because he thought \underline{\hspace{3em}} (please give a thought)". Thus, whereas in Study 1b, we elicited only one explanation per action, here in Study 2a we prompted participants for 4 possible explanations per actions. We chose a set of 10 actions that consisted of a mix of 4 intentional actions (taken from \citeNP{Malle1999}), 3 unintentional actions (e.g. ``snored in his sleep"), and 3 emotional displays (from Study 1a: ``smiled", ``cried", and ``yelled"). The modal responses served as stimuli for the rating task, below.
 
 % intentional actions after Malle 1999
 %watered his new plants
 %invited Sue to have lunch
 %stole a pound of peaches
-% drove above the speed limit -- ambiguous
+% drove above the speed limit
 
 % smiled
 % cried
@@ -207,9 +210,10 @@ The distribution of coded free-responses is given in Figure \ref{Study1bResultsF
 % snored in his sleep
 % stubbed his toe
 
+\subsection{Rating Task}
+For the rating task, we recruited a separate group of 100 participants through AMT (X\% had English as their native language).
 
 \subsubsection{Results.} 
-
 
 
 
