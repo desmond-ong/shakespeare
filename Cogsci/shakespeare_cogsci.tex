@@ -25,6 +25,16 @@
 
 
 
+%% --------- Short APA CITE Helpfile  --------- %%
+%% 	Command									Result
+%%	\cite<e.g.,>[p.~11]{Jone01,Ross87}				(e.g., Jones, 2001; Ross, 1987, p. 11)
+%%	\citeA<e.g.,>[p.~11]{Jone01,Ross87}				e.g., Jones (2001); Ross (1987, p. 11)
+%%	\citeauthor<e.g.,>[p.~11]{Jone01,Ross87}			e.g., Jones; Ross, p. 11
+%%	\citeyear<e.g.,>[p.~11]{Jone01,Ross87}			(e.g., 2001; 1987, p. 11)
+%%	\citeyearNP<e.g.,>[p.~11]{Jone01,Ross87}		e.g., 2001; 1987, p. 11
+%%	\citeNP<e.g.,>[p.~11]{Jone01,Ross87}			e.g., Jones, 2001; Ross, 1987, p. 11
+%%
+
 
 \documentclass[10pt,letterpaper]{article}
 
@@ -45,7 +55,8 @@
 \newcommand{\red}[1]{\textcolor{Red}{#1}}  
 
 
-\title{ Lay theories of emotion in explaining behavior }
+%\title{ Lay theories of emotion in explaining behavior }
+\title{ Where is the Love (in folk psychology)? \\ Emotions in lay explanations of behavior }
  
 \author{{\large \bf Desmond C. Ong (dco@stanford.edu)} \\
 {\large \bf Jamil Zaki (jzaki@stanford.edu))} \\
@@ -58,7 +69,13 @@
 \maketitle
 
 \begin{abstract}
-Abstract
+Abstract \\
+\\
+\\
+\\
+\\
+\\
+
 
 \textbf{Keywords:} 
 Keywords
@@ -77,21 +94,46 @@ Keywords
 
 
 
+% Start with a quote from the BARD. Maybe even Othello
+
+
+\begin{quote}
+\textit{``... men in rage strike those that wish them best"} 
+--- Iago, in Shakespeare's \textit{Othello}, perhaps subtly presaging the (Iago-instigated) murder of Desdemona by Othello's hands. (Act 2, Scene 3, line 205) \red{to fix: proper citation}
+\end{quote}
+
+%2.3.205 % act 2, scene 3, line 205
+
+
+We have a rich intuitive understanding of other people and their emotions. In his plays, the Bard of Avon makes masterful use of the lay person's understanding of emotion: in \textit{Othello}, the audience is privy to Iago's deliberate manipulation of Othello's jealousy and rage, and can easily predict Othello's murder of Desdemona before it happens. Consider the counterfactual scenario: would Othello still have killed Desdemona if he had not been feeling those emotions? This seems unlikely; intuitively, emotions played a key, irreplaceable role in Othello's decision making process.
+
+We naturally extend this type of powerful reasoning to explain the behavior of both fictional and nonfictional others. This process of applying knowledge to reason about the mental states and behavior of others is often called folk psychology, or lay psychology \cite<e.g., >{Heider1958, Malle2011}. Many modern theories posit a ``belief-desire psychology" \cite<e.g., >{Bartsch1995, Gopnik1997, Malle1999, Malle2011, Searle2001}, in which an agent has a set of goals (often termed \textbf{desires}), and a set of ideas on how to achieve those goals (often termed \textbf{beliefs}). The agent then forms an intention to act upon his beliefs to achieve his desires, resulting in intentional action. The tendency to attribute such \textit{intentionality} to agents forms what \citeA{Dennett1989} famously termed an ``intentional stance", and arises as early as 12 months of age \cite{Gergely1995}. When laypeople are asked to explain an agent's behavior, they often appeal to the agent's beliefs and desires that spur actions: ``Sue went to the store at 3pm, because (1) she wanted a drink, and (2) she thinks that the store sells alcohol". Laypeople also offer upstream events that resulted in a belief or desire (\citeNP{Malle1999}'s \textit{Causal History of Reasons}) as explanations: ``Sue had a bad argument (which caused her to want a drink)", as well as \textbf{Enabling Factors}, which are events that facilitated the intentional action, but did not instigate it: ``Sue got out of work early (which allowed her to go get a drink at 3pm)". Finally, these theories also for the case of non intentionality, where \textbf{unintentional behavior} are often described as a result of other causes such as \textbf{situational factors} via physical causality (or \textit{impersonal causality}; \citeNP{Heider1958}): ``Sue slipped and fell because there was ice on the floor (not because she intended to)".
+
+Sadly, these models are often emotionless\footnote{pun intended} and relegate emotions to the bin of other causes (e.g., feeling sad makes one cry, an ``unintentional behavior" that is out of the control of the agent). There is an implicit assumption that emotion-driven behavior is unintentional, or sometimes, just plain irrational. Importantly, these lay theory models do not account for how lay people use emotions in causal explanations, such as how an agent's emotional state might influence the formation of intentions. It is worth noting that many scientific theories of emotion include behavior as a crucial part of their definitions of emotion. On one hand, emotions cause characteristic ``automatic" behavioral responses like facial expressions and vocalizations \cite<e.g.,  >{Ekman1992}, and one can argue that such behavior is unintentional. On the other hand, emotions also bias organisms towards certain types of actions via \textit{action tendencies} \cite{Frijda1989, Fontaine2007} or approach/avoid motivations \cite<e.g., >{Carver2004}. For example, being in a state of happiness predisposes one towards helping others \cite{Isen1972} and risk-taking \cite{Isen1983}. Lay people do have this intuition that emotions influence intentional actions (``he replied my email; the boss must be in a good mood today"), and this has made its way into legal attributions of guilt and responsibility, as in crimes of passion like Othello's. \textit{\red{I need to work on this last line, and crime might not be the best way to end here...}}
+
+% TODO: finish this part
+
+In this paper we provide some explorations of how emotions are incorporated into lay belief-desire psychology. We show that ... \red{[TODO: finish this part with results]}
 
 
 
-%Talk about Malle's Cause vs. Reason. Intentional vs unintentional behavior
 
-\textit{Basically, no one has really studied lay explanations of emotion-driven behavior. If anything, behavior driven by emotions are couched as ``unintentional", and sometimes, ``irrational"}
-\red{[TODO: more setup]}
+%Emotions do often factor into the decision-making process of what we would normally call intentional actions: crimes of passion, and other unmediated crimes.
 
 
+%moral evaluations (Knobe, 2003)
 
 
-One hypothesis is that in our lay theories of behavior, there are two distinct processes that result in two types of behavioral responses (see Fig. \ref{ModelsOfBehaviorFig}a). The first of these processes is a rational decision making process in which an agent has a set of goals (``desires"), and a set of ideas on how to achieve those goals (often termed ``beliefs"). The agent then forms an intention to act upon his beliefs to achieve his desires, resulting in (intentional) action, as part of a ``belief-desire psychology" \cite{Dennett1989, Gopnik1997, Heider1958, Malle2011, Searle2001}. The second process, by contrast, relies on mere causality or ``impersonal causality" \cite{Heider1958}, and results in a second type of behavioral response. These behaviors could be caused by external situational factors, or as is often implicitly assumed by theories of folk psychology, the agent's emotions. Here, we make a distinction here between emotional expressions on one hand (e.g., crying), assumed to be caused only by emotions, and other unintentional behavior on the other (e.g., slipping on ice, snoring) that could be due to situational factors, and possibly emotions as well. Notably, in these theories of folk psychology, there is no place for emotions in the ``rational" decision making process that humans reason with when explaining the actions of others.
-% Probably can say a bit more in the above paragraph when I read those papers.
 
-A second hypothesis is that emotions do play an important role in the formation and execution of intentional action. Figure \ref{ModelsOfBehaviorFig}b posits a lay theory in which emotions are factored into the intentional decision making process. This approach been incorporated into psychological \cite<e.g., >{Schwarz2000emotion}, economic \cite<e.g., >{Loewenstein2003affect}, and philosophical \cite<e.g., >{Zhu2002emotion} theories of behavior, but it is unclear how a theory of folk psychology incorporates emotions into the lay model of decision making \cite{Ong2015AffCog}. A third possibility that we must also consider is that the distinction between intentional action and emotional expressions in the lay theory is needlessly strong (Fig. \ref{ModelsOfBehaviorFig}c), and that emotions, as well as beliefs and desires, impact an agent's intentional actions and emotional expressions. Indeed, emotional display rules \cite<e.g., >{Matsumoto1990} and deceptive strategies \cite<e.g., >{Depaulo2003} do impact an agent's displayed emotional expressions, and might very well be an important factor in lay explanations of behavior. However, we (as have many theorists before us) reject the notion that all instances of emotional expressions are intentional, and hence should not be a subset of intentional action.
+
+
+%One hypothesis is that in our lay theories of behavior, there are two distinct processes that result in two types of behavioral responses (see Fig. \ref{ModelsOfBehaviorFig}a). The first of these processes is a rational decision making process in which an agent has a set of goals (``desires"), and a set of ideas on how to achieve those goals (often termed ``beliefs"). The agent then forms an intention to act upon his beliefs to achieve his desires, resulting in (intentional) action, as part of a ``belief-desire psychology" \cite{Dennett1989, Gopnik1997, Heider1958, Malle2011, Searle2001}. 
+
+
+%The second process, by contrast, relies on mere causality or ``impersonal causality" \cite{Heider1958}, and results in a second type of behavioral response. 
+
+
+\section{Three possible theories of behavior}
 
 
 \begin{figure}[htb!]
@@ -103,15 +145,19 @@ A second hypothesis is that emotions do play an important role in the formation 
 \end{figure}
 
 
-
-% TODO: finish this part
-
-In this paper we provide some explorations of how emotions are incorporated into lay belief-desire psychology. We show that ... \red{[TODO: finish this part]}
+One hypothesis is that in lay people distinguish two distinct processes that result in two types of behavioral responses (see Fig. \ref{ModelsOfBehaviorFig}a). The first process assumes that agents have \textbf{Beliefs} and \textbf{Desires}, which interact, giving rise to \textbf{Intentional Actions}. The second process, by contrast, relies on mere causality, and results in a second type of behavioral response. Here, we specifically distinguish between two types of causes, \textbf{Emotions} (e.g., sadness) and \textbf{Situational Factors} (e.g., the ground is icy), and two types of behavior: \textbf{Emotional Expressions} (e.g., crying, laughing), and \textbf{Unintentional Behavior} (e.g., slipping on ice, snoring). Previous theories have subsumed Emotional Expressions into Unintentional Behavior: here, we assume that the former is only caused by emotions, whereas the latter could be caused by situational factors and possibly, emotions (this is to allow emotions to explain unintended ``irrational" behavior). Notably, in these theories of folk psychology, there is no place for emotions in the ``rational" decision making process that humans reason with when explaining the actions of others.
+% Probably can say a bit more in the above paragraph when I read those papers.
 
 
+A second hypothesis is that emotions do play an important role in the formation and execution of intentional action. Figure \ref{ModelsOfBehaviorFig}b posits a lay theory in which emotions are factored into the intentional decision making process. This approach been incorporated into psychological \cite<e.g., >{Schwarz2000emotion}, economic \cite<e.g., >{Loewenstein2003affect}, and philosophical \cite<e.g., >{Zhu2002emotion} theories of behavior, but it is unclear how a theory of folk psychology incorporates emotions into the lay model of decision making \cite{Ong2015AffCog}. Here, we simply assume that emotions somehow influences the intentional decision making process---in the Discussion, we return to how exactly this might occur.
+
+A third possibility that we must also consider is that the distinction between intentional action and emotional expressions in the lay theory is needlessly strong (Fig. \ref{ModelsOfBehaviorFig}c), and that emotions, as well as beliefs and desires, impact both an agent's intentional actions and emotional expressions. Indeed, emotional display rules \cite<e.g., >{Matsumoto1990} and deceptive strategies \cite<e.g., >{Depaulo2003} do impact an agent's displayed emotional expressions, and might very well be an important factor in lay explanations of behavior. %However, we (as have many theorists before us) reject the notion that all instances of emotional expressions are intentional, and hence should not be a subset of intentional action.
 
 
-In order to test this, we elicited what types of behavior were most likely given ...
+
+In order to test this, we used a free-response paradigm to have lay people generate actions from emotions (Study 1a), and general causes of actions (Study 1b), to show that emotion-caused actions may have other causes in the lay theory. We then ... \red{describe Study 2}.
+
+%In order to test this, we elicited behaviors that emotions were both sufficient and necessary for behaviors (Study 1a); we then elicit
 
 
 %%%%
@@ -119,7 +165,7 @@ In order to test this, we elicited what types of behavior were most likely given
 
 \section{Study 1a: Emotions to Actions}
 
-	In Study 1a\footnote{https://github.com/desmond-ong/shakespeare/Cogsci}, we elicited participants' free-response nominations of emotion-caused actions. We then obtained judgments of the counterfactual likelihood (i.e., how likely were their nominated actions, if the agent had not felt the emotion).
+	In Study 1a\footnote{https://github.com/desmond-ong/shakespeare/Cogsci}, we elicited participants' free-response nominations of emotion-caused actions. We then obtained judgments of the counterfactual likelihood (i.e., how likely were their nominated actions, if the agent had not felt the emotion). This allowed us to test lay intuitions of whether the given emotions are both sufficient (via the nomination) and necessary (via the counterfactual judgments) for the actions.
 
 % Expt 1a) Emotions --> Actions
 % Expt 1b) Generate cause of Actions. Coded into emotions, beliefs, situational factors, etc.
@@ -133,7 +179,7 @@ After participants had given completions to all 5 emotions, they were then prese
 
 
 \subsubsection{Results.} 
-Similar free-responses were grouped together (e.g., ``smiled", ``smiled widely", and ``beamed"). The top 5 responses, with nomination counts, for each emotion are given in Table \ref{Study1aResultsTable}. Many of the responses for Anger were of the form ``hit X", where X is an object or person. Note that, as expected, the majority of these top responses would easily be judged to be ``emotional expressions": some notable exceptions are ``killed himself\footnote{It is unfortunate that this is one of the modal responses for what an agent will do when he is sad...}", ``slept", and ``sat down".
+We grouped similar free-responses together (e.g., ``smiled", ``smiled widely", and ``beamed"), and present the top 5 responses for each emotion in Table \ref{Study1aResultsTable}. Note that, as expected, the majority of these modal responses would easily be judged to be \textit{emotional expressions}: some notable exceptions are ``killed himself"\footnote{It is unfortunate that this is one of the modal lay responses for what an agent will do when he is sad...}, ``punched the wall", ``slept", and ``sat down".
 
 
 \begin{table}
@@ -149,13 +195,13 @@ danced: 22 & smiled: 26 & slept: 13 & cried: 15 & yelled: 25 \\
 cried: 21 & sighed: 10 & yelled: 13 & cursed: 12 & smiled: 23 \\
 \end{tabular}
 }
-\caption{ Action nominations from emotions (Study 1a). Top 5 responses for each emotion, with nomination counts. The most common responses for anger were variants of ``hit X", where X is an object or person (of these, the modal response was: ``punched the wall"). }
+\caption{ Action nominations from emotions (Study 1a). Top 5 responses for each emotion, with nomination counts in parentheses. The most common responses for anger were variants of ``hit X", where X is an object or person (of these, the modal response was: ``punched the wall"). }
 \label{Study1aResultsTable}
 \end{table}
 
 %\multirow{2}{*}{text}
 
-The more often a particular action $a$ is nominated for emotion $e$, presumably, the more characteristic is action $a$ of emotion $e$. Hence, we should expect that these commonly nominated actions $a$ would be less likely to happen in the absence of emotion $e$. In order to test this, we regressed participants' counterfactual likelihood ratings (i.e., how likely is the action to occur if the emotion was absent, $P(A | \neg E)$) against the frequency of that action being nominated across the sample, with random intercepts by participant and emotion. We find that, across all emotions, the more frequently an action is nominated, the less likely participants rate it to occur in the absence of the emotion $(b = -0.0084, 95\% \text{ CI}: [-0.0108, -0.0060], t=-6.82, p<0.001$; See Fig. \ref{Study1aResultsFig}). Thus, the modal nominated actions are judged less likely to occur in the absence of the corresponding emotions, and might thus be seen as more characteristic of their corresponding emotions: we shall use this result in Study 1b.
+The nomination portion allowed us to test sufficiency: if a participant nominated an action $a$ when given emotion $e$, then the emotion $e$ is sufficient to have caused that action $a$. We turn next to the counterfactual rating task, to investigate necessity. We hypothesized that the more often a particular action $a$ is nominated for emotion $e$ across all participants, the more \textit{necessary} is emotion $e$ for action $a$ to occur. Hence, we should expect that these commonly nominated actions $a$ would be less likely to happen in the absence of emotion $e$. In order to test this, we regressed participants' counterfactual likelihood ratings (i.e., how likely is the action to occur if the emotion was absent, $P(A | \neg E)$) against the frequency of that action being nominated across the sample, with random intercepts by participant and emotion. We find that, across all emotions, the more frequently an action is nominated, the less likely participants rate it to occur in the absence of the emotion $(b = -0.0084, 95\% \text{ CI}: [-0.0108, -0.0060], t=-6.82, p<0.001$; See Fig. \ref{Study1aResultsFig}). Thus, the modal nominated actions are judged less likely to occur in the absence of the corresponding emotions, and thus, in participants' lay theories, the corresponding emotions are more necessary for these actions to occur: we shall use this result in Study 1b.
 
 
 
@@ -170,12 +216,11 @@ The more often a particular action $a$ is nominated for emotion $e$, presumably,
 
 \section{Study 1b: Causes of Actions}
 
-	In Study 1b, we took the top actions nominated from Study 1a, and asked a separate group of participants to give explanations for those actions. The top actions from Study 1a are judged to be less likely to occur in the absence of the emotion, and hence are presumably more characteristic of the emotions, (Study 1a). Hence, if Model 1 (Fig. \ref{ModelsOfBehaviorFig}a) were correct, we should only expect explanations due to emotions (and perhaps, situational factors).
+	In Study 1b, we recruited a separate group of participants to give explanations for the modal actions nominated from Study 1a. Lay participants from Study 1a judged emotions to be both sufficient and necessary for these modal actions to occur: hence, if Model 1 (Fig. \ref{ModelsOfBehaviorFig}a) were correct, in Study 1b, we should only expect explanations due to emotions (and perhaps, situational factors).
 
 
 \subsubsection{Participants and Procedures.} 
-In a similar manner to Study 1a, we recruited 100 participants through AMT (98\% had English as their native language). This time, participants saw statements of the form ``Bob [\textbf{action}] because \underline{\hspace{3em}}" (i.e., the reverse of Study 1a), and were asked to complete the sentence. The presented \textbf{action} was one of fifteen possible actions drawn from the most popular nominations from Study 1a (i.e., the 15 unique actions in Table \ref{Study1aResultsTable}: ``punched the wall" was used in place of ``hit X"). Participants gave 1 completion per action and saw the actions in a random order.
-% do we use the counterfactual judgments?
+In a similar manner to Study 1a, we recruited 100 participants through AMT (98\% had English as their native language). This time, participants saw statements of the form ``Bob [\textbf{action}] because \underline{\hspace{3em}}", and were asked to complete the sentence. The presented \textbf{action} was one of fifteen possible actions drawn from the most popular nominations from Study 1a (i.e., the 15 unique actions in Table \ref{Study1aResultsTable}, with ``punched the wall" used in place of ``hit X"). Participants gave 1 completion per action and saw the actions in a random order.
 
 \subsubsection{Results.} 
 The free-response completions were coded into one of five categories: (a) ``\textbf{Emotion}" (if there was a mention of an emotion word), (b) ``\textbf{Cause of Emotion}" (if there was a mention of an event that would cause an emotion, e.g., ``his dog died"), (c) ``\textbf{Physical state}" (if the explanation referenced a physical state like tiredness or pain), (d) ``\textbf{Mental state}" (if the explanation referenced a desire or a belief); (e) ``\textbf{Situation}" (for enabling and other situational factors). 
