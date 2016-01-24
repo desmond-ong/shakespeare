@@ -168,13 +168,13 @@ In order to test this, we used a free-response paradigm to have lay people gener
 
 \section{Study 1a: Emotions to Actions}
 
-	In Study 1a, we elicited participants' free-response nominations of emotion-caused actions. We then obtained judgments of the counterfactual likelihood (i.e., how likely were their nominated actions, if the agent had not felt the emotion). This allowed us to test lay intuitions of whether the given emotions are both sufficient (via the nomination) and necessary (via the counterfactual judgments) for the actions. Samples of all studies reported in this paper are available here\footnote{https://github.com/desmond-ong/shakespeare/Cogsci}.
+	In Study 1a, we elicited the actions that participants thought would be caused by different emotions. We then obtained judgments of the counterfactual likelihood (i.e., how likely were these actions if the agent had not felt the emotion). This allowed us to both find the emotions most likely to be ``emotion expressions'' (as described above) and explore whether the emotion is causally necessary to bring about these actions (via the counterfactual judgments).\footnote{Samples of all studies reported in this paper are available at: https://github.com/desmond-ong/shakespeare/Cogsci}
 
 % Expt 1a) Emotions --> Actions
 % Expt 1b) Generate cause of Actions. Coded into emotions, beliefs, situational factors, etc.
 
 \subsubsection{Participants and Procedures.} 
-We recruited 100 participants (99\% had English as their native language) through Amazon's Mechanical Turk (AMT). Participants saw statements of the form ``Bob \underline{\hspace{3em}} because he was [\textbf{emotion}]", and were asked to give sentence completions. The presented \textbf{emotion} was one of: \{happy, calm, anger, sad, surprised\}\footnote{We chose a high-arousal positive valence (``happy"), a low-arousal positive valence (``calm"), a high-arousal negative valence (``anger"), a low-arousal negative valence (``sad"), and a high-arousal neutral valence (``surprised") emotion.}. On each page, participants saw only one emotion, and gave 5 different completions (for a total of 25 completions). The emotions were presented in a random order; names were randomized on every sentence.
+We recruited 100 participants (99\% had English as their native language) through Amazon's Mechanical Turk (AMT). Participants saw statements of the form ``Bob \underline{\hspace{3em}} because he was [\textbf{emotion}]", and were asked to give sentence completions. The presented \textbf{emotion} was one of: \{happy, calm, angry, sad, surprised\}\footnote{We chose a high-arousal positive valence (``happy"), a low-arousal positive valence (``calm"), a high-arousal negative valence (``angry"), a low-arousal negative valence (``sad"), and a high-arousal neutral valence (``surprised") emotion.}. On each page, participants saw only one emotion, and gave 5 different completions (for a total of 25 completions). The emotions were presented in a random order; names were randomized on every sentence.
 
 After participants had given completions to all 5 emotions, they were then presented their answers, and asked to rate the likelihood of the counterfactual: ``You wrote that `\textit{Bob [cried] because he was [sad]}'. If Bob was not feeling [sad], would he still have [cried]?" Participants gave responses on a 7 point Likert scale from ``Very Unlikely" to ``Very Likely". 
 
@@ -182,7 +182,9 @@ After participants had given completions to all 5 emotions, they were then prese
 
 
 \subsubsection{Results.} 
-We grouped similar free-responses together (e.g., ``smiled", ``smiled widely", and ``beamed"), and present the top 5 responses for each emotion in Table \ref{Study1aResultsTable}. Note that, as expected, the majority of these modal responses would easily be judged to be \textit{emotional expressions}: some notable exceptions are ``killed himself"\footnote{It is unfortunate that this is one of the modal lay responses for what an agent will do when he is sad...}, ``punched the wall", ``slept", and ``sat down".
+We grouped similar free-responses together (e.g., ``smiled", ``smiled widely", and ``beamed"), and present the top 5 responses for each emotion in Table \ref{Study1aResultsTable}. 
+\ndg{need to say more clearly the criteria for grouping and who did it.... ideally we will get this done by naive coders (eg on turk), or automated (eg via synsets).}
+Note that, as expected, the majority of these modal responses would easily be judged to be \textit{emotional expressions}: some notable exceptions are ``killed himself"\footnote{It is unfortunate that this is one of the modal lay responses for what an agent will do when he is sad...}, ``punched the wall", ``slept", and ``sat down".
 
 
 \begin{table}
@@ -204,7 +206,12 @@ cried: 21 & sighed: 10 & yelled: 13 & cursed: 12 & smiled: 23 \\
 
 %\multirow{2}{*}{text}
 
-The nomination portion allowed us to test sufficiency: if a participant nominated an action $a$ when given emotion $e$, then the emotion $e$ is sufficient to have caused that action $a$. We turn next to the counterfactual rating task, to investigate necessity. We hypothesized that the more often a particular action $a$ is nominated for emotion $e$ across all participants, the more \textit{necessary} is emotion $e$ for action $a$ to occur. Hence, we should expect that these commonly nominated actions $a$ would be less likely to happen in the absence of emotion $e$. In order to test this, we regressed participants' counterfactual likelihood ratings (i.e., how likely is the action to occur if the emotion was absent, $P(A | \neg E)$) against the frequency of that action being nominated across the sample, with random intercepts by participant and emotion. We find that, across all emotions, the more frequently an action is nominated, the less likely participants rate it to occur in the absence of the emotion $(b = -0.0084, 95\% \text{ CI}: [-0.0108, -0.0060], t=-6.82, p<0.001$; See Fig. \ref{Study1aResultsFig}). Thus, the modal nominated actions are judged less likely to occur in the absence of the corresponding emotions, and thus, in participants' lay theories, the corresponding emotions are more necessary for these actions to occur: we shall use this result in Study 1b.
+%%NOTE: this is false:
+%The free response portion allowed us to test sufficiency: if a participant nominated an action $a$ when given emotion $e$, then the emotion $e$ is sufficient to have caused that action $a$. 
+
+We turn next to the counterfactual rating task, to investigate necessity of emotion for the elicited actions. 
+\ndg{it's probably worth first saying something about the absolute ratings for the modal actions -- this is what we really care about, though lacking any calibration it's hard to draw conclusions...}
+We hypothesized that the more often a particular action $a$ is nominated for emotion $e$ across all participants, the more \textit{necessary} is emotion $e$ for action $a$ to occur. Hence, we should expect that these commonly nominated actions $a$ would be less likely to happen in the absence of emotion $e$. In order to test this, we regressed participants' counterfactual likelihood ratings (i.e., how likely is the action to occur if the emotion was absent, $P(A | \neg E)$) against the frequency of that action being nominated across the sample, with random intercepts by participant and emotion. We find that, across all emotions, the more frequently an action is nominated, the less likely participants rate it to occur in the absence of the emotion $(b = -0.0084, 95\% \text{ CI}: [-0.0108, -0.0060], t=-6.82, p<0.001$; See Fig. \ref{Study1aResultsFig}). Thus, the modal nominated actions are judged less likely to occur in the absence of the corresponding emotions, and thus, in participants' lay theories, the corresponding emotions are more necessary for these actions to occur: we shall use this result in Study 1b.
 
 
 
@@ -219,20 +226,27 @@ The nomination portion allowed us to test sufficiency: if a participant nominate
 
 \section{Study 1b: Causes of Actions}
 
-	In Study 1b, we recruited a separate group of participants to give explanations for the modal actions nominated from Study 1a. Lay participants from Study 1a judged emotions to be both sufficient and necessary for these modal actions to occur: hence, if Model 1 (Fig. \ref{ModelsOfBehaviorFig}a) were correct, in Study 1b, we should only expect explanations due to emotions (and perhaps, situational factors).
+In Study 1b, we recruited a separate group of participants to give explanations for the modal actions nominated from Study 1a. 
+This allows us to explore sufficiency of emotions to cause the actions elicited above, and to test among causal models of ``emotional expressions.''
+If Model 1 (Fig. \ref{ModelsOfBehaviorFig}a) is correct then in Study 1b we should only find explanations due to emotions (and perhaps, situational factors), and not explanations that appeal to beliefs or desires.
+%	Lay participants from Study 1a judged emotions to be necessary for these modal actions to occur: hence, 
 
 
 \subsubsection{Participants and Procedures.} 
-In a similar manner to Study 1a, we recruited 100 participants through AMT (98\% had English as their native language). This time, participants saw statements of the form ``Bob [\textbf{action}] because \underline{\hspace{3em}}", and were asked to complete the sentence. The presented \textbf{action} was one of fifteen possible actions drawn from the most popular nominations from Study 1a (i.e., the 15 unique actions in Table \ref{Study1aResultsTable}, with ``punched the wall" used in place of ``hit X"). Participants gave 1 completion per action and saw the actions in a random order.
+We recruited 100 participants through AMT (98\% had English as their native language). This time, participants saw statements of the form ``Bob [\textbf{action}] because \underline{\hspace{3em}}", and were asked to complete the sentence. The presented \textbf{action} was one of the fifteen actions drawn from the most popular responses from Study 1a (i.e., the 15 unique actions in Table \ref{Study1aResultsTable}, with ``punched the wall" used in place of ``hit X"). Participants gave 1 completion per action and saw the actions in a random order.
 
 \subsubsection{Results.} 
 The free-response completions were coded into one of five categories: (a) ``\textbf{Emotion}" (if there was a mention of an emotion word), (b) ``\textbf{Cause of Emotion}" (if there was a mention of an event that would cause an emotion, e.g., ``his dog died"), (c) ``\textbf{Physical state}" (if the explanation referenced a physical state like tiredness or pain), (d) ``\textbf{Mental state}" (if the explanation referenced a desire or a belief); (e) ``\textbf{Situation}" (for enabling and other situational factors). 
+\ndg{same comment about coding. even more so, since there is some judgement involved in eg deciding whether a situation factor is a cause of emotion or just a situation....}
 
-The distribution of coded free-responses is given in Figure \ref{Study1bResultsFig}. If the actions generated from Study 1a were characteristic of those emotions, and if they could only have been caused by emotions (i.e., Fig. \ref{ModelsOfBehaviorFig}a), then we should expect the vast majority of the explanations to be due to emotions, or to upstream causes of emotions\footnote{``Because he is sad" is a somewhat unsatisfying explanation to ``why is he crying?" in conversation, and often begs the question ``well, so what made him sad?". People often give Causes of Emotion as explanations for (obvious) emotions, and so we decided to code specifically for these.}. However, we see that in fact, only 40.7\% of explanations appeal to an Emotion, and 51.7\% appeal to an Emotion or to a Cause of an Emotion. There are many other references to Physical states (e.g. physical pain as a cause for ``cursing" or ``yelling"; fatigue as a cause of ``sat down" or ``slept"), or to Mental states (e.g. a belief or a desire). Thus, it seems very likely that lay people's judgments of emotion-caused actions are not, in fact, predominantly caused only by emotions, which might support a more parsimonious model, as in Figure \ref{ModelsOfBehaviorFig}c. We test this model more precisely in Study 2.
+The distribution of coded free-responses is given in Figure \ref{Study1bResultsFig}. \ndg{i like this figure!}
+If the actions generated from Study 1a were characteristic of those emotions, and if they could only have been caused by emotions (i.e., Fig. \ref{ModelsOfBehaviorFig}a), then we should expect the vast majority of the explanations to be due to emotions, or to upstream causes of emotions\footnote{``Because he is sad" is a somewhat unsatisfying explanation to ``why is he crying?" in conversation, and often begs the question ``well, so what made him sad?". People often give Causes of Emotion as explanations for (obvious) emotions, and so we decided to code specifically for these.}. However, we see that in fact, only 40.7\% of explanations appeal to an Emotion, and 51.7\% appeal to an Emotion or to a Cause of an Emotion. There are many other references to Physical states (e.g. physical pain as a cause for ``cursing" or ``yelling"; fatigue as a cause of ``sat down" or ``slept"), or to Mental states (e.g. a belief or a desire). Thus, it seems very likely that lay people's judgments of emotion-caused actions are not, in fact, predominantly caused only by emotions. 
+This provides support for a simpler model, as in Figure \ref{ModelsOfBehaviorFig}c, which does not distinguish intention-caused from emotion-caused actions. 
+We test this model more precisely in Study 2.
 
 \begin{figure}[htb!]
 \begin{center}\includegraphics[width=1\columnwidth]{images/study1b_codePlot.pdf}\end{center}
-\caption{ Results of Study 1b. We plot the number of nominations that fall into each explanation type for each action. }
+\caption{ Results of Study 1b. We plot the number of explanations that fall into each type for each action. }
 \label{Study1bResultsFig}
 \end{figure}
 
