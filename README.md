@@ -11,3 +11,4 @@ If you do finish an experiment, you'll also see a mockup of the data that would'
 
 + Study1a: http://rawgit.com/desmond-ong/shakespeare/master/Experiments/Study%201a/index.html
 + Study1b: http://rawgit.com/desmond-ong/shakespeare/master/Experiments/Study%201b/index.html
++ Study2: http://rawgit.com/desmond-ong/shakespeare/master/Experiments/Study%202/index.html
