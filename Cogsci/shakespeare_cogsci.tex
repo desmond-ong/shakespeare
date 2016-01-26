@@ -171,9 +171,6 @@ Figure \ref{ModelsOfBehaviorFig}c illustrates this possibility by allowing an ag
 In this paper we provide some preliminary explorations of how emotions are incorporated into the intuitive belief-desire psychology, and specifically, how emotions are used or judged as explanations of intentional actions. First, we begin by laying out three possible models: each provides distinct, testable predictions that we explore via experiments with lay participants. In Study 1, we study the types of actions that laypeople think emotions cause, and show that the top emotion-caused actions are judged to have been caused by emotions only about half the time. In Study 2, we show that laypeople are willing to endorse emotions as causes of intentional actions. We also find that people are willing to endorse beliefs and desires as likely causes of emotional expressions (e.g., smiling), which have been treated as unintentional behavior in previous lay theories. This paper provides a first step in exploring how emotions are used by laypeople in explaining behavior, and we end by discussing future directions that are inspired by this research.
 
 
-%In order to test this, we used a free-response paradigm to have lay people generate actions from emotions (Study 1a), and causes of these actions (Study 1b), to show that emotion-caused actions are judged likely to be caused by other, non-emotional causes. We then tested the three models more rigorously by elicited judgments of explanations of intentional actions, emotional expressions, and unintentional behavior (Study 2).
-
-
 %%%%
 
 \section{Study 1a: Emotions to Actions}
@@ -182,8 +179,7 @@ In this paper we provide some preliminary explorations of how emotions are incor
 	We then obtained judgments of the counterfactual likelihood (i.e., how likely were the actions the participant nominated if the agent had not been feeling the given emotion). 
 	This allowed us to both find the emotions most likely to be ``emotion expressions'' (as described above) and explore whether the emotion is causally necessary to bring about these actions (via the counterfactual judgments).\footnote{Samples of all studies reported in this paper, as well as data and coding analyses, are available at: \\https://github.com/desmond-ong/shakespeare/}
 
-% Expt 1a) Emotions --> Actions
-% Expt 1b) Generate cause of Actions. Coded into emotions, beliefs, situational factors, etc.
+
 
 \subsubsection{Participants and Procedures.} 
 We recruited 100 participants (99\% had English as their native language) through Amazon's Mechanical Turk (AMT). Participants saw statements of the form ``Bob \underline{\hspace{3em}} because he was [\textbf{emotion}]", and were asked to give sentence completions. The presented \textbf{emotion} was one of: \{happy, calm, angry, sad, surprised\}\footnote{We chose a high-arousal positive valence (``happy"), a low-arousal positive valence (``calm"), a high-arousal negative valence (``angry"), a low-arousal negative valence (``sad"), and a high-arousal neutral valence (``surprised") emotion.}. On each page, participants saw only one emotion, and gave 5 different completions (for a total of 25 completions). The emotions were presented in a random order; names were randomized on every sentence.
@@ -198,6 +194,7 @@ We grouped similar free-responses together (e.g., ``smiled", ``smiled widely", a
 \ndg{need to say more clearly the criteria for grouping and who did it.... ideally we will get this done by naive coders (eg on turk), or automated (eg via synsets).}
 Note that, as expected, the majority of these modal responses would easily be judged to be \textit{emotional expressions}: some notable exceptions are ``killed himself"\footnote{It is unfortunate that this is one of the modal lay responses for what an agent will do when he is sad...}, ``punched the wall", ``slept", and ``sat down".
 
+%TODO: Add more details about coding.
 
 \begin{table}
 \scalebox{0.80}{
@@ -220,6 +217,8 @@ cried: 21 & sighed: 10 & yelled: 13 & cursed: 12 & smiled: 23 \\
 %%NOTE: this is false:
 %The free response portion allowed us to test sufficiency: if a participant nominated an action $a$ when given emotion $e$, then the emotion $e$ is sufficient to have caused that action $a$. 
 
+% TODO: Talk about Absolute Ratings.
+
 We turn next to the counterfactual rating task, to investigate necessity of emotion for the elicited actions. 
 \ndg{it's probably worth first saying something about the absolute ratings for the modal actions -- this is what we really care about, though lacking any calibration it's hard to draw conclusions...}
 We hypothesized that the more often a particular action $a$ is nominated for emotion $e$ across all participants, the more \textit{necessary} is emotion $e$ for action $a$ to occur. Hence, we should expect that these commonly nominated actions $a$ would be less likely to happen in the absence of emotion $e$. In order to test this, we regressed participants' counterfactual likelihood ratings (i.e., how likely is the action to occur if the emotion was absent, $P(A | \neg E)$) against the frequency of that action being nominated across the sample, with random intercepts by participant and emotion. 
@@ -241,7 +240,7 @@ Thus, in participants' lay theories, the corresponding emotions are more necessa
 \section{Study 1b: Causes of Actions}
 
 In Study 1b, we recruited a separate group of participants to give explanations for the modal actions nominated from Study 1a. 
-This allows us to explore sufficiency of emotions to cause the actions elicited above, and to test among causal models of ``emotional expressions.''
+This allows us to explore the sufficiency of emotions to cause the actions elicited above, and to test among causal models of ``emotional expressions.''
 If Model 1 (Fig. \ref{ModelsOfBehaviorFig}a) is correct then in Study 1b we should only find explanations due to emotions (and perhaps, situational factors), and not explanations that appeal to beliefs or desires.
 %	Lay participants from Study 1a judged emotions to be necessary for these modal actions to occur: hence, 
 
@@ -252,6 +251,9 @@ We recruited 100 participants through AMT (98\% had English as their native lang
 \subsubsection{Results.} 
 The free-response completions were coded into one of five categories: (a) ``\textbf{Emotion}" (if there was a mention of an emotion word), (b) ``\textbf{Cause of Emotion}" (if there was a mention of an event that would cause an emotion, e.g., ``his dog died"), (c) ``\textbf{Physical state}" (if the explanation referenced a physical state like tiredness or pain), (d) ``\textbf{Mental state}" (if the explanation referenced a desire or a belief); (e) ``\textbf{Situation}" (for enabling and other situational factors). 
 \ndg{same comment about coding. even more so, since there is some judgement involved in eg deciding whether a situation factor is a cause of emotion or just a situation....}
+
+% TODO: Add more details about coding.
+% TODO: Discuss the Causes of Emotion more explicitly.
 
 The distribution of coded free-responses is given in Figure \ref{Study1bResultsFig}. \ndg{i like this figure!}
 If the actions generated from Study 1a were characteristic of those emotions, and if they could only have been caused by emotions (i.e., Fig. \ref{ModelsOfBehaviorFig}a), then we should expect the vast majority of the explanations to be due to emotions, or to upstream causes of emotions\footnote{``Because he is sad" is a somewhat unsatisfying explanation to ``why is he crying?" in conversation, and often begs the question ``well, so what made him sad?". People often give Causes of Emotion as explanations for (obvious) emotions, and so we decided to code specifically for these.}. However, we see that in fact, only 40.7\% of explanations appeal to an Emotion, and 51.7\% appeal to either an Emotion or to a Cause of an Emotion. There are many references to Physical states (e.g. physical pain as a cause for ``cursing" or ``yelling"; fatigue as a cause of ``sat down" or ``slept"), or to Mental states (e.g. a belief or a desire). Thus, it seems very likely that lay people's judgments of emotion-caused actions are not, in fact, predominantly caused only by emotions. 
@@ -265,10 +267,13 @@ We test this model more precisely in Study 2.
 \end{figure}
 
 
+
+
+
+
 \section{Study 2: Rating explanations for actions}
 
 
-%In Study 1a/b, we examined participants' judgments of actions from several emotions, and we did not impose any formal structure on the type of actions that people generated (e.g., whether they were intentional actions or emotional expressions). 
 In Study 2, we explored a broader set of actions, in order to further test the models in Figure \ref{ModelsOfBehaviorFig}. We chose a set of actions comprising Intentional Actions, Emotional Expressions, and Unintentional Behavior, and asked participants to rate how likely it was that each action was caused by Belief, Desire, Emotion, and Situational Factor explanations\footnote{Although the three models do not differentiate between the causes of Unintentional Behavior, we included Unintentional Behavior and Situational Factors in order to calibrate against baseline predictions that all three models should make.
 }. First, we aimed to determine if people judge emotions as suitable explanations for intentional behavior. Second, we aimed to confirm the finding from Study 1 that people will judge beliefs and desires as suitable explanations for emotional expressions. 
 Specifically, we would predict, under the model in Figure \ref{ModelsOfBehaviorFig}c, that:
@@ -329,14 +334,13 @@ Measuring lay theories is difficult, as one must elicit the lay participant's ju
 
 There is obviously much more work to be done to fully elaborate on how emotions affect intentional actions in the lay theory. Borrowing ideas from empirical evidence on emotions, emotions might impact an agent's beliefs, by affecting their subjective judgments of probability \cite{Wright1992} or influencing the processing of novel information \cite{Forgas1995}. Alternatively, emotions might influence desires, by introducing new goals via approach/avoid motivations \cite{Carver2004}, or by introducing emotional states as regulatory goals in and of themselves \cite{Gross2006}. Finally, emotions might have a direct impact on intentional action that is independent of beliefs and desires; this possibility might be needed for lay explanations of ``rash" decisions (such as crimes of passion, like Othello). Future work should address all of these possibilities.
 
-%How do emotions affect intentional action?
-%Influence beliefs
-%Influence desires
-%Influence other than via beliefs/desires.
-%All these are ripe for future work!
 
+% Discuss beliefs/desires --> expressions.
 
 In summary, here, we have focused on lay explanations of behavior. This work builds towards a larger program of research on how humans use rich intuitive theories of emotion to reason about others---what we call Affective Cognition \cite{Ong2015AffCog}. Intuitive theories of emotion have broad and wide-reaching impact on all forms of social cognition, from understanding the family, friends and colleagues around us, to making attributions in moral and legal judgments. And of course, they help us enjoy a little theatre. 
+
+
+
 
 %Using sentence completions to study intuitive theories
 
@@ -346,6 +350,7 @@ In summary, here, we have focused on lay explanations of behavior. This work bui
 
 This work was supported in part by an A*STAR National Science Scholarship to DCO and by \red{[TODO:] XXX to NDG}.
 
+% From 2015 cogsci paper: by a James S. McDonnell Foundation Scholar Award and ONR grant N00014-13- 1-0788 
 
 \bibliographystyle{apacite}
 
