@@ -164,7 +164,8 @@ Figure \ref{ModelsOfBehaviorFig}c illustrates this possibility by allowing an ag
 \begin{center}
 \includegraphics[width=1\columnwidth]{images/model1.pdf} 
 \end{center}
-\caption{ Possible lay theories of behavior. (a) There are two distinct types of behavioral responses; on the left, an intentional decision-making process results in intentional action from beliefs and desires. On the right, unintentional behavior and emotional expressions are simply caused by situational factors and emotions via simple causality, without the need for an agent's intentionality. (b) Emotions influence the intentional decision making process. (c) Beliefs and desires also influence emotional expressions. }
+\caption{ Possible lay theories of behavior. (a) Two distinct types of behavioral responses: Left, beliefs and desires influence an intentional decision-making process, resulting in intentional action; Right, unintentional behavior and emotional expressions are simply caused by situational factors and emotions, without the need for an agent's intentionality. (b) Emotions influence the intentional decision making process. (c) Beliefs and desires also influence emotional expressions. }
+%\caption{ Possible lay theories of behavior. (a) There are two distinct types of behavioral responses; on the left, an intentional decision-making process results in intentional action from beliefs and desires. On the right, unintentional behavior and emotional expressions are simply caused by situational factors and emotions via simple causality, without the need for an agent's intentionality. (b) Emotions influence the intentional decision making process. (c) Beliefs and desires also influence emotional expressions. }
 \label{ModelsOfBehaviorFig}
 \end{figure}
 
@@ -197,10 +198,10 @@ After participants had given completions to all 5 emotions, they were then prese
 
 
 
-
 \subsubsection{Results.} 
-We grouped similar free-responses together (e.g., ``smiled", ``smiled widely", and ``beamed"), and present the top 5 responses for each emotion in Table \ref{Study1aResultsTable}. 
-\ndg{need to say more clearly the criteria for grouping and who did it.... ideally we will get this done by naive coders (eg on turk), or automated (eg via synsets).}
+Two coders (the first author and an independent coder) independently coded the free-responses into prototype actions, by removing adverbs and modifiers, and grouping by synonyms (e.g., ``smiled", ``smiled widely", and ``beamed"). There was agreement on over 99.6\% of the responses; disagreements were resolved by consensus.
+The top 5 responses for each emotion is given in Table \ref{Study1aResultsTable}, and these 900 responses make up 36\% of all responses. 
+%\ndg{need to say more clearly the criteria for grouping and who did it.... ideally we will get this done by naive coders (eg on turk), or automated (eg via synsets).}
 As expected, the majority of these modal responses would easily be judged to be emotional expressions: some notable exceptions are ``killed himself"\footnote{It is unfortunate that this is one of the modal lay responses for what an agent will do when he is sad...}, ``punched the wall", ``slept", and ``sat down".
 
 %TODO: Add more details about coding.
@@ -209,15 +210,15 @@ As expected, the majority of these modal responses would easily be judged to be 
 \scalebox{0.80}{
 \begin{tabular}{l l l l l}
 \textbf{Happy} & \textbf{Calm} & \textbf{Sad} & \textbf{Anger} & \textbf{Surprised} \\
-smiled: 63 & relaxed: 50 & cried: 97 & ``hit X": 56 & jumped: 65 \\
-laughed: 51 & slept: 46 & frowned: 17 & yelled: 54 & laughed: 41 \\
-\multirow{2}{*}{jumped: 42} & \multirow{2}{*}{sat down: 32} & killed & \multirow{2}{*}{screamed: 21} & \multirow{2}{*}{screamed: 30} \\
+smiled: 73 & relaxed: 52 & cried: 97 & ``hit X": 69 & jumped: 65 \\
+laughed: 52 & slept: 46 & frowned: 17 & yelled: 56 & laughed: 41 \\
+jumped: 42 & sat down: 34 & slept: 14 & screamed: 27 & screamed: 30 \\
+\multirow{2}{*}{danced: 23} & \multirow{2}{*}{smiled: 26} & killed & \multirow{2}{*}{cried: 16} & \multirow{2}{*}{yelled: 26} \\
 & & himself: 13 & & \\
-danced: 22 & smiled: 26 & slept: 13 & cried: 15 & yelled: 25 \\
-cried: 21 & sighed: 10 & yelled: 13 & cursed: 12 & smiled: 23 \\
+cried: 21 & sighed: 10 & yelled: 13 & cursed: 14 & smiled: 23 \\
 \end{tabular}
 }
-\caption{ Action nominations from emotions (Study 1a). Top 5 responses for each emotion, with nomination counts in parentheses. The most common responses for anger were variants of ``hit X", where X is an object or person (of these, the modal response was: ``punched the wall"). }
+\caption{ Study 1a Results: Top 5 responses for each emotion (frequency counts in parentheses). The most common responses for anger were variants of ``hit X", where X is an object or person (of these, the modal was: ``punched the wall"). }
 \label{Study1aResultsTable}
 \end{table}
 
@@ -229,10 +230,14 @@ cried: 21 & sighed: 10 & yelled: 13 & cursed: 12 & smiled: 23 \\
 % TODO: Talk about Absolute Ratings.
 
 We turn next to the counterfactual rating task, to investigate necessity of emotion for the elicited actions. 
-\ndg{it's probably worth first saying something about the absolute ratings for the modal actions -- this is what we really care about, though lacking any calibration it's hard to draw conclusions...}
-We hypothesized that the more often a particular action $a$ is nominated for emotion $e$ across all participants, the more \textit{necessary} is emotion $e$ for action $a$ to occur. Hence, we should expect that these commonly nominated actions $a$ would be less likely to happen in the absence of emotion $e$. In order to test this, we regressed participants' counterfactual likelihood ratings (i.e., how likely is the action to occur if the emotion was absent, $P(A | \neg E)$) against the frequency of that action being nominated across the sample, with random intercepts by participant and emotion. 
-We find that, across all emotions, the more frequently an action is nominated, the less likely participants rate it to occur in the absence of the corresponding emotion $(b = -0.0084, 95\% \text{ CI}: [-0.0108, -0.0060], t=-6.82, p<0.001$; See Fig. \ref{Study1aResultsFig}). 
-%Thus, the modal nominated actions are judged less likely to occur in the absence of the corresponding emotions, and 
+First, we note that the mean counterfactual ratings (i.e., how likely is the action to occur if the emotion was absent, $P(A | \neg E)$) for the modal responses (M(SD)=3.08(1.92)) was significantly lower than that of the non-modal responses (M(SD)=3.32(1.85); $t$=3.14, $p<.001$): people judged the modal responses to be less likely to occur in the absence of the emotion, than the non-modal actions.
+%\ndg{it's probably worth first saying something about the absolute ratings for the modal actions -- this is what we really care about, though lacking any calibration it's hard to draw conclusions...}
+%We hypothesized that the more often a particular action $a$ is generated for emotion $e$ across all participants, the more \textit{necessary} is emotion $e$ for action $a$ to occur. Hence, we should expect that these commonly generated actions $a$ would be less likely to happen in the absence of emotion $e$. 
+%In order 
+Additionally, we hypothesized that the more often a particular action $a$ is generated for emotion $e$ \textit{across all participants}, the more \textit{necessary} is emotion $e$ for action $a$ to occur.
+To test this, we regressed participants' counterfactual likelihood ratings against the frequency of that action being generated across the sample, with random intercepts by participant and emotion. 
+We find that, across all emotions, the more frequently an action is generated, the less likely participants rate it to occur in the absence of the corresponding emotion $(b = -0.0083, 95\% \text{ CI}: [-0.0106, -0.0060], t=-7.15, p<0.001$; See Fig. \ref{Study1aResultsFig}). 
+%Thus, the modal generated actions are judged less likely to occur in the absence of the corresponding emotions, and 
 Thus, in participants' lay theories, the corresponding emotions are more necessary for these modal actions to occur: we shall use this result in Study 1b.
 
 
@@ -241,14 +246,14 @@ Thus, in participants' lay theories, the corresponding emotions are more necessa
 \begin{center}
 	\includegraphics[width=0.85\columnwidth]{images/study1a_results.pdf}
 \end{center}
-\caption{ Study 1a Results. Individual counterfactual likelihood ratings ($P(A | \neg E)$) against frequency of an action's nomination across the sample. Data points are transparent and jittered for clarity. }
+\caption{ Study 1a Results. Individual counterfactual likelihood ratings ($P(A | \neg E)$) against frequency of an action's generation across the sample. Data points are transparent and jittered for clarity. }
 \label{Study1aResultsFig}
 \end{figure}
 
 
 \section{Study 1b: Causes of Actions}
 
-In Study 1b, we recruited a separate group of participants to give explanations for the modal actions nominated from Study 1a. 
+In Study 1b, we recruited a separate group of participants to give explanations for the modal actions generated from Study 1a. 
 This allows us to explore the sufficiency of emotions to cause the actions elicited above, and to test among causal models of ``emotional expressions.''
 If Model 1 (Fig. \ref{ModelsOfBehaviorFig}a) is correct then in Study 1b we should only find explanations due to emotions (and perhaps, situational factors), and not explanations that appeal to beliefs or desires.
 %	Lay participants from Study 1a judged emotions to be necessary for these modal actions to occur: hence, 
@@ -308,7 +313,7 @@ Specifically, we would predict, under the model in Figure \ref{ModelsOfBehaviorF
 \begin{figure*}[htb!]
 \begin{center}
 \includegraphics[width=1\linewidth]{images/study2Results.pdf}\end{center}
-\caption{ Study 2 Results. Mean ratings, with 95\% confidence intervals (CIs), of how likely each explanation type was to have caused the action. Left most column: cluster prototypes from a clustering analyses, with CIs obtained from 100 bootstraps.}
+\caption{ Study 2 Results. Mean ratings, with 95\% confidence intervals (CIs), of how likely each explanation type was to have caused the action. Left most column: cluster prototypes from clustering analyses, with CIs obtained from 100 bootstraps.}
 %\caption{ Results of Study 2. Mean ratings of how likely each explanation type was to have caused the action. The left most column, shaded in grey, illustrate the stable prototype clusters from a clustering analyses. Error bars indicate 95\% confidence intervals (CI). CIs on prototype clusters were obtained from 100 bootstraps.}
 \label{Study2ResultsFig}
 \end{figure*}
@@ -364,7 +369,7 @@ The 4 cluster profiles look similar to what we predicted: an Intentional profile
 The Ambiguous profile is an interesting case that result from variations in participants' appraisal. Some participants may judge a given action as Intentional, others, Unintentional; and yet others, as Expressions. %(indeed, that was the conclusion from \citeA{Malle1999}'s study).
 
 Participants' ratings for the causes of different actions are shown in Figure \ref{Study2ResultsFig}. In each row, we show the actions that were assigned to the prototype cluster shown on the left. While the unsupervised clustering results for the Expressions and Unintentional Behavior matched our a priori predictions exactly, we note that there were a few actions that were not classified according to our initial hypothesized groupings. Importantly, ``drove above the speed limit", fit more closely with the Intentional profile than the Ambiguous profile, while ``bought a round of drinks for everyone", and ``invited Sue to have lunch", more closely resembled the Ambiguous profile than the Intentional profile.
-Finally, we visualized the explanation profiles using multidimensional scaling and projecting down to a two-dimensional plot (Fig. \ref{Study2MDSFig}). In this visualization, we see that the Intentional, Ambiguous, and Expressions clusters seem to fall along a spectrum, suggesting some structure that future work should verify and explore.
+Finally, we visualized the explanation profiles using multidimensional scaling and projecting down to a two-dimensional plot (Fig. \ref{Study2MDSFig}). In this visualization, we see that the Intentional, Ambiguous, and Expressions clusters seem to fall along a spectrum, suggesting some structure in a higher-dimensional semantic space that future work should verify and explore.
 %\ndg{say something about fig 5, the mds. use this as an opportunity to point out that the clusters, aside from unintentional, seem to fall along a spectrum.}
 
 
