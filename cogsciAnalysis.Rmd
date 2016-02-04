@@ -1,0 +1,2075 @@
+---
+title: "Shakespeare Cogsci Analysis"
+author: "Desmond Ong"
+date: "January 31, 2016"
+output: html_document
+---
+
+```{r preamble, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(lme4)
+#setwd("~/Git/shakespeare/")
+source("Data/processData.R")
+source("Data/summarySE.R")
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+trimPunct <- function (x) gsub("[[:punct:]]", "", tolower(trim(x)))
+
+
+d1a <- read.csv('Data/cogsci_study1a.csv', header=T)
+d1b <- read.csv('Data/cogsci_study1b.csv', header=T)
+
+d2.wide <- read.csv('Data/cogsci_study2.csv', header=T)
+
+
+
+# basic demographics
+# table(d1a$nativeLanguage)
+# table(d1b$nativeLanguage)
+```
+
+
+```{r d1a-clean-up-synonyms, echo=FALSE}
+
+d1aLong = data.frame(workerid = rep(d1a$workerid, 25),
+                    emotion = rep(c("Happy", "Calm", "Sad", "Angry", "Surprised"), each=5*nrow(d1a)),
+                    counterfactual = c(c(d1a$counterfactualHappy.1,
+                                         d1a$counterfactualHappy.2,
+                                         d1a$counterfactualHappy.3,
+                                         d1a$counterfactualHappy.4,
+                                         d1a$counterfactualHappy.5),
+                                       c(d1a$counterfactualCalm.1,
+                                         d1a$counterfactualCalm.2,
+                                         d1a$counterfactualCalm.3,
+                                         d1a$counterfactualCalm.4,
+                                         d1a$counterfactualCalm.5),
+                                       c(d1a$counterfactualSad.1,
+                                         d1a$counterfactualSad.2,
+                                         d1a$counterfactualSad.3,
+                                         d1a$counterfactualSad.4,
+                                         d1a$counterfactualSad.5),
+                                       c(d1a$counterfactualAngry.1,
+                                         d1a$counterfactualAngry.2,
+                                         d1a$counterfactualAngry.3,
+                                         d1a$counterfactualAngry.4,
+                                         d1a$counterfactualAngry.5),
+                                       c(d1a$counterfactualSurprised.1,
+                                         d1a$counterfactualSurprised.2,
+                                         d1a$counterfactualSurprised.3,
+                                         d1a$counterfactualSurprised.4,
+                                         d1a$counterfactualSurprised.5)),
+                    freeResponses = c(c(as.character(trimPunct(d1a$freeResponseHappy.1)),
+                                        as.character(trimPunct(d1a$freeResponseHappy.2)),
+                                        as.character(trimPunct(d1a$freeResponseHappy.3)),
+                                        as.character(trimPunct(d1a$freeResponseHappy.4)),
+                                        as.character(trimPunct(d1a$freeResponseHappy.5)) ),
+                                      c(as.character(trimPunct(d1a$freeResponseCalm.1)),
+                                        as.character(trimPunct(d1a$freeResponseCalm.2)),
+                                        as.character(trimPunct(d1a$freeResponseCalm.3)),
+                                        as.character(trimPunct(d1a$freeResponseCalm.4)),
+                                        as.character(trimPunct(d1a$freeResponseCalm.5)) ),
+                                      c(as.character(trimPunct(d1a$freeResponseSad.1)),
+                                        as.character(trimPunct(d1a$freeResponseSad.2)),
+                                        as.character(trimPunct(d1a$freeResponseSad.3)),
+                                        as.character(trimPunct(d1a$freeResponseSad.4)),
+                                        as.character(trimPunct(d1a$freeResponseSad.5)) ),
+                                      c(as.character(trimPunct(d1a$freeResponseAngry.1)),
+                                        as.character(trimPunct(d1a$freeResponseAngry.2)),
+                                        as.character(trimPunct(d1a$freeResponseAngry.3)),
+                                        as.character(trimPunct(d1a$freeResponseAngry.4)),
+                                        as.character(trimPunct(d1a$freeResponseAngry.5)) ),
+                                      c(as.character(trimPunct(d1a$freeResponseSurprised.1)),
+                                        as.character(trimPunct(d1a$freeResponseSurprised.2)),
+                                        as.character(trimPunct(d1a$freeResponseSurprised.3)),
+                                        as.character(trimPunct(d1a$freeResponseSurprised.4)),
+                                        as.character(trimPunct(d1a$freeResponseSurprised.5)) ))
+                      )
+
+
+# Angry: voted for trump
+
+# Convert synonyms
+# 9 disagreements; 2500 responses.
+d1aLong$freeResponsesCoded = as.character(d1aLong$freeResponses)
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was smiling"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="beamed"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gently smiled"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="has a big smile on his face"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is smiling"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is smiling widely"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled and nodded"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled at the assistant"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled contentedly"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled softly"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="grinned"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled big"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled non stop"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled really big"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled wildly"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled with his bright smile"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smile"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled a large smile"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled a lot"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled all day"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled as big as the sun"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled at everyone"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled at his coworkers"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled broadly"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled from ear to ear"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled wide"]="smiled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiles"]="smiled"
+
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at his wife"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at a coworker at work"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at his daughter"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at his dog"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at his mother"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at his sister"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at his teacher"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at someone"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at the old woman"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at the top of his lungs"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled hurrah"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled in delight"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled in joy"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled out"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled loudly"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at his children"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled at his friends"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="yelled back"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was yelling"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="shouted at the man"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="shouted out"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="shouted out loud"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="lashed out"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="lashed out at a friend today"]="yelled"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="lashed out at his wife"]="yelled"
+
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried all day"]="cried"                                              
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried alot"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried big tears"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried like a little girl"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried loudly"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried out loud"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried to him self"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried to his mom"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cryed"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="had tears running down his face"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is crying"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is crying today"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="wept"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was crying"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sobbed"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried himself to sleep"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried out"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried softly"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cried tears of joy"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="started to cry"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="began to cry"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="broke down and cried"]="cried"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="started crying"]="cried"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="danced a silly jig"]="danced"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="danced around in circles"]="danced"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="danced around the room"]="danced"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="danced wildly"]="danced"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="dances"]="danced"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="did a dance"]="danced"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="did a jig"]="danced"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was dancing"]="danced"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="danced around"]="danced"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="started to dance"]="danced"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="rested"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was relaxed"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="laid down"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is relaxed"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is serene"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is peaceful"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is quiet"]="relaxed" #
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was quiet"]="relaxed" #
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="closed his eyes"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="closed his eyes quietly"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="meditated"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="could relax"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="relaxed by the pool"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="relaxed on the couch"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="remained silent"]="relaxed" #
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was tranquil"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="rested peacefully"]="relaxed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="resumed his solitude"]="relaxed"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat quietly"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat alone"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat in silence"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat still"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="quietly sat"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat back"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat by the water"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat down on the couch"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat down to relax"]="sat down" #
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat neutral"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat on the couch"]="sat down" 
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat outside in the sun"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sat there"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was sitting down"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was sitting still"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sits around"]="sat down"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sits in the chair"]="sat down"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave a hug"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hugged his mother"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hugged his wife"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hugged a loved one"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hugged everyone"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hugged her"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hugged his brother"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hugged his friend"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hugged his kids"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hugged his son"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hugged me"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave his mother a hug"]="hugged"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hugged"]="hugged X"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped in the air"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped up"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped for joy"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped up and down"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped a little"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped away"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped back from the pile of leaves"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped backward"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped backwards"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped from the roof"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped in joy"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped out of his chair"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped out of his skin"]="jumped" #
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped sky high"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped up and yelled out"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped up in the air"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped with excitment"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumped with joy"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumps high in the air"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="jumps up and down"]="jumped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="leaped"]="jumped"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="laughed out loud"]="laughed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was laughing"]="laughed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="laughed nervously"]="laughed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cackled"]="laughed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="chuckled"]="laughed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="laughed and hugged his friends"]="laughed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="laughed and screamed at once"]="laughed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="laughed in an outburst"]="laughed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="laughed loudly"]="laughed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="laughs out loud"]="laughed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smiled and laughed at his sons jokes"]="laughed" #
+
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="called his friend"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="called his mom"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="called his mother"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="call his girlfriend"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="called"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="called a friend to talk"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="called his friends"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="called his wife"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="called me"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="called some friends"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="called up john"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="calls his mother"]="called"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="called"]="called X"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="swore"]="cursed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cursed at his friend"]="cursed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="shouted profanity"]="cursed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="muttered profanities"]="cursed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="swore out loud"]="cursed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="shouted loud curses"]="cursed"  #
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="started swearing"]="cursed"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drank alcohol"]="drank"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="got drunk"]="drank"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drank a beer"]="drank"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="decided to go out for a drink"]="drank"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drank a bottle of vodka"]="drank"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drank another whiskey"]="drank"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="had a drink"]="drank"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fell over"]="fell"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fell down"]="fell"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fell down the well"]="fell"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fell to the floor"]="fell"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fell to the ground"]="fell"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="feel off his chair"]="fell"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fell backward"]="fell"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched the wall"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched a wall"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit the wall"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit something"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fought"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="started a fight"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fought someone"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="got into an altercation"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="picked a fight"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit me in the face"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit someone"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit things"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched someone"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="attacked a the woman"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="beat up his brother"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="beat up his dog"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit bob"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit his brother"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit his kid"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit his significant other"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit me"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit the attacker"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smacked his dog"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="smacked his wife"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="kicked a bucket"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="kicked his dog"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="kicked someone"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="kicked the door closed"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="kicked the plant"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="kicked the table"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punch someone"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punch the wall"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched a hole in the drywall"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched a hole in the wall"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched a stranger"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched his enemy"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched his fist through the wall"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched his friend"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched james"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched jerome in his face"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="punched that grandmother in the face"]="hit"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hit"]="hit X"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="committed suicide"]="killed himself"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hung himself"]="killed himself"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="cut himself"]="killed himself" #
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="screamed loudly"]="screamed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="screamed very loudly"]="screamed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="screamed out"]="screamed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="screamed at him him"]="screamed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="screamed at his mom"]="screamed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="screamed at mary"]="screamed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="screamed really loud"]="screamed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="screaming out loud"]="screamed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="scremed"]="screamed"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fell asleep"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="went to sleep"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="slept all day"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="passed out"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="decided to go to sleep"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="feel asleep"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fell asleep quickly"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="took a nap"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was sleepy"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="napped"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="slept great"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="slept in his bed"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="slept soundly"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="took a relaxing nap"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="was sleeping"]="slept"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="slept all d ay"]="slept"
+
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="argued back"]="argued"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="argued with his significant"]="argued"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="argued with his wife"]="argued"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate ice cream"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate junk food"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate out"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate a steak"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate a whole"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate all of the food"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate an orange"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate crackers"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate excessively"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate lots of icecream"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate mushrooms"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate pizza"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate potato chips"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate slowly"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate so much pie he was sick"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate some candy"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ate too much"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="began to overeat junk food"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="eats more today"]="ate food"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="eat food"]="ate food"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought a gift for himself"]="bought stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought a new cd"]="bought stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought a new prosthetic arm"]="bought stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought a round of drinks"]="bought stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought drinks"]="bought stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought extra doughnuts"]="bought stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought himself a gift"]="bought stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought some clothes"]="bought stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bout drinks"]="bought stuff"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="breathed deeply"]="breathed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="breathed deep"]="breathed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="breathed heavily"]="breathed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="breathed slowly"]="breathed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="breathed slowly and deeply"]="breathed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="took deep breaths"]="breathed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="took three deep breaths"]="breathed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="took deep breathes"]="breathed"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="broke a window"]="broke"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="broke a chair"]="broke"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="broke a glass"]="broke"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="broke a lamp"]="broke"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="broke his foot"]="broke"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="broke something"]="broke"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="broke stuff"]="broke"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="broke things"]="broke"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="broke"]="broke X"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="clapped his hands"]="clapped"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="curled into a ball"]="curled up"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="curled up in a ball"]="curled up"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="curled up on the ground"]="curled up"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="day dreamed"]="daydreamed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="zoned out"]="daydreamed"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="donated to charity"]="donated"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave to charity"]="donated"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave 1 to a homeless man"]="donated"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave a donation to his church"]="donated"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave a homeless guy a quarter"]="donated"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave a homeless guy some food"]="donated"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave everyone money"]="donated"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave her his last dollar"]="donated"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave money to the bum"]="donated"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="dropped his bag"]="dropped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="dropped his dinner"]="dropped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="dropped his drink"]="dropped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="dropped his keys"]="dropped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="dropped the bag"]="dropped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="dropped the cake"]="dropped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="dropped the tray of glasses"]="dropped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="dropped"]="dropped X"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drove aggressively"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drove at a steady pace just under the speed limit"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drove away"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drove away dangerously"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drove back home"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drove happily"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drove his car off a cliff"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drove like a maniac through a school zone"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drove recklessly"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="drove the speed limit"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="went for a drive"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="began to drive aggressively"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="broke the speed limit"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="went for a peaceful drive"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="went for a spirited drive"]="drove"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="went on a drive"]="drove"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="collapsed"]="fainted"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fainted on the floor"]="fainted"
+ 
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="finished his work faster"]="finished his work" 
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="got his work done quickly"]="finished his work"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="scowled"]="frowned"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="frowned at her"]="frowned"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="frowns"]="frowned"
+
+#d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fumed"]
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="fumed with rage"]="fumed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is outraged"]="fumed"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is furious"]="fumed"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="furrowed his eyebrows"]="furrowed his brow" # frowned
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought a gift for his wife"]="gave stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought his coworkers donuts"]="gave stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought his friend a gift"]="gave stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="bought his wife some flowers"]="gave stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave his girlfriend"]="gave stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave his mom a gift"]="gave stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave me a ticket"]="gave stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave out cigars"]="gave stuff"                                                   
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave out money"]="gave stuff"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="gave the woman"]="gave stuff"
+
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="greeted everyone"]="greeted"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="greeted everyone he came across"]="greeted"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="greeted random people"]="greeted"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="greeted"]="greeted X"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="helped her"]="helped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="helped out"]="helped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="helped someone out"]="helped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="helped them"]="helped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="helped us out"]="helped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is helpful"]="helped"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="helped"]="helped X"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hid away"]="hid"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hid away in a closet"]="hid"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hid from everyone"]="hid"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hid himself"]="hid"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hid his head"]="hid"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hid in his car"]="hid"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="is hiding in his room"]="hid"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hung outnwith friends"]="hung out"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="hung up on his friend"]="hung up the phone"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ignored his girlfriend"]="ignored"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ignored his obligations"]="ignored"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ignored the comments"]="ignored"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ignored the officer"]="ignored"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="ignored"]="ignored X"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="peed in his pants"]="dirtied himself"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="peed his pants"]="dirtied himself"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="wet himself"]="dirtied himself"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="defecated in his pants"]="dirtied himself"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="read a book"]="read"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="went to read a book"]="read"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sang a song"]="sang"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sang in the shower"]="sang"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sung"]="sang"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sung a song"]="sang"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sings"]="sang"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="sang to himself"]="sang"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="let out a sigh"]="sighed"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="stormed away"]="stormed off"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="stormed out"]="stormed off"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="stormed out of the house"]="stormed off"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="stormed out of the room"]="stormed off"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="left the room"]="stormed off" #
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="went for a walk"]="walked"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="walked away"]="walked"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="took a walk"]="walked"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="decided to go for a walk"]="walked"
+
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="wrote a check to his favorite charity"]="wrote"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="wrote a mean letter"]="wrote"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="wrote a paragraph"]="wrote"
+d1aLong$freeResponsesCoded[d1aLong$freeResponsesCoded=="wrote poetry"]="wrote"
+
+
+
+d1aTable = sort(table(d1aLong$freeResponsesCoded), decreasing=TRUE)
+
+actionsSortedHappyNames = names(sort(table(subset(d1aLong,d1aLong$emotion=="Happy")$freeResponsesCoded), decreasing=TRUE))
+actionsSortedHappyValues = as.vector(sort(table(subset(d1aLong,d1aLong$emotion=="Happy")$freeResponsesCoded), decreasing=TRUE))
+actionsSortedCalmNames = names(sort(table(subset(d1aLong,d1aLong$emotion=="Calm")$freeResponsesCoded), decreasing=TRUE))
+actionsSortedCalmValues = as.vector(sort(table(subset(d1aLong,d1aLong$emotion=="Calm")$freeResponsesCoded), decreasing=TRUE))
+actionsSortedSadNames = names(sort(table(subset(d1aLong,d1aLong$emotion=="Sad")$freeResponsesCoded), decreasing=TRUE))
+actionsSortedSadValues = as.vector(sort(table(subset(d1aLong,d1aLong$emotion=="Sad")$freeResponsesCoded), decreasing=TRUE))
+actionsSortedAngryNames = names(sort(table(subset(d1aLong,d1aLong$emotion=="Angry")$freeResponsesCoded), decreasing=TRUE))
+actionsSortedAngryValues = as.vector(sort(table(subset(d1aLong,d1aLong$emotion=="Angry")$freeResponsesCoded), decreasing=TRUE))
+actionsSortedSurprisedNames = names(sort(table(subset(d1aLong,d1aLong$emotion=="Surprised")$freeResponsesCoded), decreasing=TRUE))
+actionsSortedSurprisedValues = as.vector(sort(table(subset(d1aLong,d1aLong$emotion=="Surprised")$freeResponsesCoded), decreasing=TRUE))
+
+```
+
+### Experiment 1: Free-response generation of actions, given emotions.
+
+N=100. Ps responded to the prompt: "Bob ____ because he was feeling Happy/Calm/Sad/Anger/Surprised" Each P sees all 5 emotions, gives 5 responses to each emotion. 
+
+Following this, they see all the responses they gave, and gave counterfactual judgments.
+
+"Earlier you said: 'Bob smiled because he was feeling happy. If Bob was not happy, would he still have smiled?"
+-- 7 point Likert from Very Unlikely to Very Likely.
+
+Thus in the first part, they generated samples from Actions|Emotions (i.e., sampling from P(A|E)). In the second part, they gave P(Action | NOT Emotion), (i.e., P(A|notE)).
+
+#### P(A|E): "Bob ____ because he was feeling [Emotion]"
+
+Here are the top 5 responses for each emotion (+ word counts).
+
+Happy | Calm | Sad | Anger | Surprised
+--- | --- | --- | --- | ---
+`r actionsSortedHappyNames[1]`: `r actionsSortedHappyValues[1]` | `r actionsSortedCalmNames[1]`: `r actionsSortedCalmValues[1]` | `r actionsSortedSadNames[1]`: `r actionsSortedSadValues[1]` | `r actionsSortedAngryNames[1]`: `r actionsSortedAngryValues[1]` <br>(e.g. "punched the wall") | `r actionsSortedSurprisedNames[1]`: `r actionsSortedSurprisedValues[1]` 
+`r actionsSortedHappyNames[2]`: `r actionsSortedHappyValues[2]` | `r actionsSortedCalmNames[2]`: `r actionsSortedCalmValues[2]` | `r actionsSortedSadNames[2]`: `r actionsSortedSadValues[2]` | `r actionsSortedAngryNames[2]`: `r actionsSortedAngryValues[2]` | `r actionsSortedSurprisedNames[2]`: `r actionsSortedSurprisedValues[2]` 
+`r actionsSortedHappyNames[3]`: `r actionsSortedHappyValues[3]` | `r actionsSortedCalmNames[3]`: `r actionsSortedCalmValues[3]` | `r actionsSortedSadNames[3]`: `r actionsSortedSadValues[3]` | `r actionsSortedAngryNames[3]`: `r actionsSortedAngryValues[3]` | `r actionsSortedSurprisedNames[3]`: `r actionsSortedSurprisedValues[3]` 
+`r actionsSortedHappyNames[4]`: `r actionsSortedHappyValues[4]` | `r actionsSortedCalmNames[4]`: `r actionsSortedCalmValues[4]` | `r actionsSortedSadNames[4]`: `r actionsSortedSadValues[4]` | `r actionsSortedAngryNames[4]`: `r actionsSortedAngryValues[4]` | `r actionsSortedSurprisedNames[4]`: `r actionsSortedSurprisedValues[4]` 
+`r actionsSortedHappyNames[5]`: `r actionsSortedHappyValues[5]` | `r actionsSortedCalmNames[5]`: `r actionsSortedCalmValues[5]` | `r actionsSortedSadNames[5]`: `r actionsSortedSadValues[5]` | `r actionsSortedAngryNames[5]`: `r actionsSortedAngryValues[5]` | `r actionsSortedSurprisedNames[5]`: `r actionsSortedSurprisedValues[5]` 
+
+
+#### P(A | not E)
+Here is the distribution of P(A | not E) for the actions they provided.
+
+```{r d1a-plot-counterfactual-distribution, echo=FALSE}
+#If Zach was not sad, would he still have cried? 
+# 1 = very unlikely, 7 = very likely
+
+ggplot(d1aLong, aes(x=counterfactual)) + geom_histogram(aes(fill=emotion), binwidth=1, origin=-0.5, colour="black") + scale_x_continuous(limits=c(0.5,7.5), breaks=c(1,2,3,4,5,6,7), labels=c("V. Unlikely", "", "", "", "", "", "V. Likely")) + xlab("Counterfactual judgment, P(A | not E)") + ylab("Number of Responses") + facet_wrap(~emotion, ncol=3) + guides(fill=FALSE) + theme_bw()
+
+#anova(lmer(counterfactual ~ emotion + (1|workerid), d1aLong))
+
+```
+
+```{r d1a-modal-vs-nonmodal, echo=FALSE}
+HappySubset = subset(d1aLong, d1aLong$emotion=="Happy")
+HappySubsetModal = subset(HappySubset, HappySubset$freeResponsesCoded %in% actionsSortedHappyNames[1:5])
+HappySubsetNotModal = subset(HappySubset, !HappySubset$freeResponsesCoded %in% actionsSortedHappyNames[1:5])
+CalmSubset = subset(d1aLong, d1aLong$emotion=="Calm")
+CalmSubsetModal = subset(CalmSubset, CalmSubset$freeResponsesCoded %in% actionsSortedCalmNames[1:5])
+CalmSubsetNotModal = subset(CalmSubset, !CalmSubset$freeResponsesCoded %in% actionsSortedCalmNames[1:5])
+SadSubset = subset(d1aLong, d1aLong$emotion=="Sad")
+SadSubsetModal = subset(SadSubset, SadSubset$freeResponsesCoded %in% actionsSortedSadNames[1:5])
+SadSubsetNotModal = subset(SadSubset, !SadSubset$freeResponsesCoded %in% actionsSortedSadNames[1:5])
+AngrySubset = subset(d1aLong, d1aLong$emotion=="Angry")
+AngrySubsetModal = subset(AngrySubset, AngrySubset$freeResponsesCoded %in% actionsSortedAngryNames[1:5])
+AngrySubsetNotModal = subset(AngrySubset, !AngrySubset$freeResponsesCoded %in% actionsSortedAngryNames[1:5])
+SurprisedSubset = subset(d1aLong, d1aLong$emotion=="Surprised")
+SurprisedSubsetModal = subset(SurprisedSubset, SurprisedSubset$freeResponsesCoded %in% actionsSortedSurprisedNames[1:5])
+SurprisedSubsetNotModal = subset(SurprisedSubset, !SurprisedSubset$freeResponsesCoded %in% actionsSortedSurprisedNames[1:5])
+
+subsetModal = rbind(HappySubsetModal, CalmSubsetModal, SadSubsetModal, AngrySubsetModal, SurprisedSubsetModal)
+subsetNotModal = rbind(HappySubsetNotModal, CalmSubsetNotModal, SadSubsetNotModal, AngrySubsetNotModal, SurprisedSubsetNotModal)
+
+
+
+# Means and SDs of the modal/nonmodal counterfactual judgments
+
+#nrow(subsetModal) #900
+#nrow(subsetNotModal) #1600
+mean(subsetModal$counterfactual); sd(subsetModal$counterfactual)
+mean(subsetNotModal$counterfactual); sd(subsetNotModal$counterfactual)
+
+t.test(subsetModal$counterfactual, subsetNotModal$counterfactual, paired=F)
+
+
+```
+
+
+#### P(A | not E) vs. P(A|E)
+Here, I've plotted the counterfactual judgment P(A | not E) on the y axis, against the frequency of that action being nominated, i.e. P(A | E) summarized across participants. There is a significant negative relationship. That is, as the event gets more and more frequently cited (e.g. "cried"), it becomes more and more diagnostic of that emotion (i.e., more unlikely to cry given not sad).
+
+
+```{r d1a-counterfactual-judgments-distributions, echo=FALSE, eval=TRUE}
+
+# calculate frequency responses within each emotion
+
+d1aTableHappy = sort(table(subset(d1aLong, d1aLong$emotion=="Happy")$freeResponsesCoded), decreasing=TRUE)
+d1aTableCalm = sort(table(subset(d1aLong, d1aLong$emotion=="Calm")$freeResponsesCoded), decreasing=TRUE)
+d1aTableSad = sort(table(subset(d1aLong, d1aLong$emotion=="Sad")$freeResponsesCoded), decreasing=TRUE)
+d1aTableAngry = sort(table(subset(d1aLong, d1aLong$emotion=="Angry")$freeResponsesCoded), decreasing=TRUE)
+d1aTableSurprised = sort(table(subset(d1aLong, d1aLong$emotion=="Surprised")$freeResponsesCoded), decreasing=TRUE)
+
+for(j in 1:nrow(d1aLong)) {
+  if(d1aLong$emotion[j]=="Happy") {
+    d1aLong$frequency[j] = as.vector(d1aTableHappy)[which(d1aLong$freeResponsesCoded[j] == names(d1aTableHappy))]
+  } else if(d1aLong$emotion[j]=="Calm") {
+    d1aLong$frequency[j] = as.vector(d1aTableCalm)[which(d1aLong$freeResponsesCoded[j] == names(d1aTableCalm))]
+  } else if(d1aLong$emotion[j]=="Sad") {
+    d1aLong$frequency[j] = as.vector(d1aTableSad)[which(d1aLong$freeResponsesCoded[j] == names(d1aTableSad))]
+  } else if(d1aLong$emotion[j]=="Angry") {
+    d1aLong$frequency[j] = as.vector(d1aTableAngry)[which(d1aLong$freeResponsesCoded[j] == names(d1aTableAngry))]
+  } else {
+    d1aLong$frequency[j] = as.vector(d1aTableSurprised)[which(d1aLong$freeResponsesCoded[j] == names(d1aTableSurprised))]
+  }
+}
+
+#ggplot(d1aLong, aes(x=frequency, y=counterfactual)) + geom_point(position=position_jitter(width=.5,height=.2)) + geom_smooth(method="lm") + xlab("Frequency of response P(A|E)") + ylab("Counterfactual judgment P(A|not E)") + facet_wrap(~emotion, ncol=3)
+
+study1aModel = lmer(counterfactual ~ frequency + (1|workerid) + (1|emotion), d1aLong)
+summary(study1aModel)
+#summary(study1aModel)$coeff[2,1]
+#summary(study1aModel)$coeff[2,1] - 1.96 * summary(study1aModel)$coeff[2,2]
+#summary(study1aModel)$coeff[2,1] + 1.96 * summary(study1aModel)$coeff[2,2]
+#2*(1-pnorm(abs(summary(study1aModel)$coeff[2,3])))
+```
+
+```{r d1a-plot, echo=FALSE, fig.width=5, fig.height=4}
+ggplot(d1aLong, aes(x=frequency, y=counterfactual)) + geom_point(alpha=0.4, position=position_jitter(width=.5,height=.2)) + geom_smooth(method="lm") + xlab("Frequency of response across sample") + ylab("Counterfactual judgment P(A | not E)") + theme_bw()
+# pdf 5 x 4
+```
+
+### Study 1b
+
+#### P(x|A): "Bob [Action] because __________"
+
+Below I've plotted the frequency of emotion and non-emotion explanations for each action.
+
+
+```{r d1b-coding, echo=FALSE}
+for(j in c(50:64)) { d1b[,j]<-as.character(trimPunct(as.character(d1b[,j]))) }
+
+actionOrdered = as.character(c("cried", "smiled", "yelled", "jumped", "laughed", "screamed", "slept", "cursed", "danced", "frowned", "relaxed", "sat down", "sighed", "killed himself", "punched the wall"))
+
+d1bLong = data.frame(workerid = rep(d1b$workerid, 15),
+                    action = rep(actionOrdered, each=nrow(d1b)),
+                    counterfactual = c(d1b$counterfactualJudgmentsOrdered.1,
+                                       d1b$counterfactualJudgmentsOrdered.2,
+                                       d1b$counterfactualJudgmentsOrdered.3,
+                                       d1b$counterfactualJudgmentsOrdered.4,
+                                       d1b$counterfactualJudgmentsOrdered.5,
+                                       d1b$counterfactualJudgmentsOrdered.6,
+                                       d1b$counterfactualJudgmentsOrdered.7,
+                                       d1b$counterfactualJudgmentsOrdered.8,
+                                       d1b$counterfactualJudgmentsOrdered.9,
+                                       d1b$counterfactualJudgmentsOrdered.10,
+                                       d1b$counterfactualJudgmentsOrdered.11,
+                                       d1b$counterfactualJudgmentsOrdered.12,
+                                       d1b$counterfactualJudgmentsOrdered.13,
+                                       d1b$counterfactualJudgmentsOrdered.14,
+                                       d1b$counterfactualJudgmentsOrdered.15),
+                    freeResponses = c(d1b$freeResponsesOrdered.1,
+                                      d1b$freeResponsesOrdered.2,
+                                      d1b$freeResponsesOrdered.3,
+                                      d1b$freeResponsesOrdered.4,
+                                      d1b$freeResponsesOrdered.5,
+                                      d1b$freeResponsesOrdered.6,
+                                      d1b$freeResponsesOrdered.7,
+                                      d1b$freeResponsesOrdered.8,
+                                      d1b$freeResponsesOrdered.9,
+                                      d1b$freeResponsesOrdered.10,
+                                      d1b$freeResponsesOrdered.11,
+                                      d1b$freeResponsesOrdered.12,
+                                      d1b$freeResponsesOrdered.13,
+                                      d1b$freeResponsesOrdered.14,
+                                      d1b$freeResponsesOrdered.15)
+                    )
+
+d1bLong$causeCode = -1
+
+# coded sort(table(d1bLong$freeResponses)) 1-855
+
+# 1 = emotion
+# 2 = upstream cause of emotion
+# 3 = non-emotion mental state (e.g. belief)
+# 4 = physical state (e.g. tiredness, pain)
+# 5 = enabling factor (e.g. was in dance class), or cause of non-emotion desire
+
+d1bLong$causeCode[d1bLong$freeResponses=="a driver cut him off"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="a hard days work is complete"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="a large spider got in his house"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="a loud sound frightened him"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="a puddle was in the way"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="a spider crawled onto his shoulder"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="a spider landed on his arm"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="a spider ran up his arm"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="a spider was crawling across the floor"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="all his work was done"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="because he has the cutest kids on the block"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="because he suffered from depression"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="because he was bored"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="because he was off work"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="because he was uncomfortable"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="because he was upset"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="because it was raining outside"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="because something was funny"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="being a keystone cop is tiring work"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="bill told a funny joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="crazy"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="dinner was ready"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="everyone else in the auditorium sat down"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="frustarted"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="frustrated"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="george killed himself"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="gloria came into his life"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="god had changed his name to israel"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="god made him king of israel"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="had a long day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he arrived back home"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he broke his finger"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he broke his leg"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he burned himself"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he burnt his hand on the frying pan"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he burnt his toast"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he caught his girlfriend cheating"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he could no longer feel happy in this world"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he could not be consoled"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he could not control himself anymore"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he could not cope anymore"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt deal with his anger"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt deal with the pain"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt find a better solution"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt get his way"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt handle the pressures of everyday life"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt see a way out"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt see anything but darkness ahead"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt stand life"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt stand living in constant pain anymore"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt stand the public scrutiny for what he had done"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt step up above the rocks"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he couldnt take the pressures of life anymore"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he cut himself"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he cut his finger with a sharp knife"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he deserved a break from the stress of his everyday life"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he did do all he could do and was exhausted"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he did not enjoy life anymore"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he did not like the tone someone was using"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he did not want to live anymore"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he did well on his report card"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he didnnhe didnt get a new playstation"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt do well on his test"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt enjoy life"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt like his lunch"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt like the daily special"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt like what he heard"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt sleep enough last night"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt think anyone would listen to him otherwise"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt think the joke was funny"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt think there was any better solution"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt turn in his homework"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt understand how peopel could be so careless"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt want to go to work"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt want to take his anger out on a person"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he disappointed at something"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he does not know how to control his anger"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he doesnt like charlies wife"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he drank too much"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he dropped his wrench into the engine compartment"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he dunked"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he enjoyed the music"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he farted and blamed someone else and they believed him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he feet are tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he fell"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he felt a little hopeless"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he felt ashamed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he felt comfortable"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he felt disappointed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he felt frustrated"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he felt good"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he felt good about the presentation he made"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he felt good inside"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he felt happy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he felt he deserved it"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he felt helpless"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he felt hopeless"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he felt hurtn"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he felt isolated"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he felt jovial"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he felt no one cared"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he felt sad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he felt sad and alone"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he felt so tired from work"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he felt the groove"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he felt there was nothing to live for"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he felt tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he felt tired standing up"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he felt too much pain"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he finally completed his work assignment"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he finally got to bust a nut"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he finished his studying"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he finished the race"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he forgot what he was thinking about"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he found a joke funny"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he found out that his father had passed away"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he found something funny"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he found the joke to be funny"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he found to joke to be hilarious"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he got a date with a girl hes loved for some time"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he got a good grade"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he got a nasty taste in his mouth while drinking spoiled milk"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he got a pay raise"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he got a phone call he didnt expect"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he got a speeding ticket"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he got angry"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he got away with it"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he got high as a kite"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he got mad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he got off of work"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he got scared by a noise"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he got startled"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he got the joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he got upset from losing the game"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he got what he wanted"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he had a beer in hand"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had a busy day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had a great day"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he had a hard day"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he had a hard work day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had a long day of work that was now finally over"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had a stressful week"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he had a terminal illness"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had a very hectic day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had anger issues"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had been on his feet all day"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had been standing for too long and felt faint"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had been upset by her far too many times"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he had been working"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had cancer"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had energy"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had enough"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he had finished the task"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had had a long day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had happy feet"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had just come home from a hard days work"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had just got off work"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had just heard a funny joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had just received lifechanging news"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he had made a mistake"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he had missed her face"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he had nothing to live for"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he had sex"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had some mms"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he had stayed up late the night before"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had stayed up studying all night"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had taken too many drugs"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had the flu"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had to"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he had to be up for work in the morning"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he had to confer with his clients"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he had to fill out some paperwork"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he had to get out of the way of the remote control car"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had to get past something on the ground that he didnt want to walk on"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had to let off some steam"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he had to stay in traffic"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had too"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he had too much homework"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had worked a long day"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had worked all weekend and was exhausted"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he had worked hard"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he hadnt heard a joke that good in a long time"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he hammered his nail"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he has low morals"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he has no willpower"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he has to pay a bill"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he has to put up with clients"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he hated his life"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he heard a bad joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he heard a fantastic joke on tv"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he heard a good joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he heard a great joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he heard a loud noise"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he heard a loud sound"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he heard bad news"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he heard good news"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he heard some bad news"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he hit himself"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he hit himself in the foot"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he hit his big toe on the leg of the table"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he hit his finger"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he hit his finger with a hammer"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he hit his shin"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he hit his thumb on the door"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he hurt his thumb while doing housework"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he is celebrating an important milestone"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he is extremely mad about work"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he is michael jordan and that is what michael jordan does"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he is tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he just finished reading a sad book"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he just found out he did not get the promotion"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he just got a girls number"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he just got home from work"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he just got home from work and wants to unwind"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he just got off of work"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he just heard a funny joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he just received a promotion"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he just stubbed his toe"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he just won the lottery"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he knew that his coworker getting the promotion was unfair"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he knew this was just one more problem hed have to deal with"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he like the song"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he liked dancing"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he liked what happened"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he listened to too many emo cds"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he looked in a mirror"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he lose his dog"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost a huge bet"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost control of his temper"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he lost everything in the stock market and was embarrassed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he lost his dog"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost his job"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost his job to outsourcing"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost his mother"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost his pudding"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost his self control"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost his wallet"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost his wife"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost the game"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he lost the love of his life"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he loved that song"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he loved the song"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he loved the song playing"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he loves house music"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he made a joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he met his wife for lunch"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he missed his parents"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he needed a break"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he needed a mental break"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he needed help"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he needed rest"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he needed to recharge after a long day of work"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he needed to rest his feet"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he needed to take off his shoes"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he needed to write"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he no longer had to worry about student loan debt"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he noticed a pretty woman smiling at him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he read a funny joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he read a text from his wife"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he realized he was going to score really high on the exam"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he realized they couldnt understand his point of view"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he received a bonus at work"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he received a nice text"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he received a nice text message"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he received a promotion at work"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a angry dog"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a cute puppy"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a doh"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a funny picture"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a funny picture online"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a funny video online"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a monster"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a pretty girl"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a rat"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a rat run across the ground"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a sad child"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a snake he is afraid of"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a snake in front of him"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a snake on the ground"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a spooky ghost"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a stand up comedian show"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw an injured animal on the side"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he saw his crush"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw his fried in another car"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he saw his lovely wife"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw michael jackson"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw someone he didnt want to"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he saw someone he loved"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw something scary on the tv screen"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw stray kitten mewing"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he slammed his finger in a door"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he slammed his hand in the car door"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he slammed his hand in the door"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he smelled like an elderly woman"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he spent too much time on 4chan"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he spilled his beer"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he stayed up all night"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he struck his thumb with a hammer"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he stub his big toe"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he sucked"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he thought chris rock was very funny"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he thought it was funny"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he thought of a happy memory"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he thought of his mother"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he thought of someone he loved"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he thought the joke was funny"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he thought there was no other way to deal with his problems"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wad scared"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted air"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted the kids to come back to the house for dinner"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to avoid the alligator"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to be heard"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to be somewhere else"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to catch someones attention"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to express himself"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to impress his lady"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to let go"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to rest but he still had a lot of work to do"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to take a break"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to take a shot"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to use the computer"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was a depressed person"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was a glass case of emotions"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was a rebel"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was a sadist and saw what happened to jacob"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was about to kill tom"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was agitated"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was an alcoholic and his family was being torn apart"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was an idiot"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was angry about his bills"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was angry about work"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was angry and out of control"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was angry at his boss"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was angry at his wife"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was angry at the cashier"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was angry with his boss"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was asked to"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was at a disco party"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was at a nightclub"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was at a wedding"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was at ballroom dance lessons"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was at ease"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was at his limit"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was at home"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was at peace"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was at prom"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was beaming"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was beat in a race"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he was busy all day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was calling the dog"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was celebrating his friends wedding"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was comfortable"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was concerned"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was concluded"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was confused"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was dancing"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was deeply depressed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was depresssed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was disappointed in the game results"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was dizzy"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was done for the day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was done with work all day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was done working"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was e xcited"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was enraged"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was exasperated with the toddler"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was excited about his grade"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was excited about the football game"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was exercising"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was exhasted"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was exhausted after working out"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was extremely frustrated"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was extremely frustratedn"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was exuberant"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was far away"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was fed up with everything"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was feeling exuberant"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was feeling grim"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was feeling tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was feeling upset"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was filled with joy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was finally done working for the da"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was finally finished with his course"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was finally home"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was finished"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was forced to by his coworkers at the party"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was frustraited"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was frustrated by something his girlfriend did"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was frustrated with alice"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was frustrated with the situation"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was full of joy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was furious and outraged"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was getting an awesome blowjob"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was giggly"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was going to eat"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was growing board of the rabbis dull sermon"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was hallucinating"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was happy to see his girlfriend"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was having a horrible nightmare"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he was having a nervous breakdown"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was high"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was high as a kite"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was hit with a bowling ball"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was home"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was horrified"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was ill"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was in a contest"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was in love"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was in pain from cancer"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was in the mood"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was interested"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was irritated"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was jovial"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was jump roping"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was just chillin"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was late"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was listening to van halen"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was lost in the forest"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was lost in the woods"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was mad at himself"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was mad at his professor"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was mad at his roommate"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was mad at sally"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was mad that he lost the game"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was madnhe was mad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was melancholy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was mowing the lawn"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was not happy to hear that he would have to go to work on his day off"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was off for the day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was off of work"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was off work"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was on a cruise"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was on break"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was on steroids"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was overjoyed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was overwhelmed"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was pissed off"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was pleased to hear that his boyfriend was happy with his gift"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he was reading a book"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was ready to eat dinner"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was ready to relax"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was really happy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was really tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was sad about the letter"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was sad he lost a friend"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was sad to hear some news"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was scared by his sister"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was severely depressed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was shocked"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was sick of life"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was sitting in a nice chair"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was so angry at his wife"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was so mad at his girlfriend"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was so mad at his parents"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was so mad at what happened"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was so tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was some what exasperated"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was spooked"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was standing all day"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was standing on a trampoline"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was stoned"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was stressed about his failing grades"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was stressed out"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was stung by a wasp"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was stupid"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was surprised"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was taking a break"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was taking a very annoying survey editors note referenced item is another survey"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he was taking rx psych drugs that caused him to do it"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was terrifed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was terrified"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was tickled"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was tired after a long day at work"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was tired and it was bedtime"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was tired from a long day of hiking"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was tired from work"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was tired from working"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was tired of explaining the same thing over and over again"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was tired of her excuses"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was tired of walking in the mall"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was told a funny joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was training"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was unheard"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was unsure"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was up in da club"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was upser"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was upset about something"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was upset at the loss"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was upset with his best friend and girlfriend"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was very depressed and things had seemed hopeless"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was very frustrated"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was very mad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was waiting on a friend"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was warm and cozy"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was warning billy"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was watching 40 year old virgin"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was watching a scary movie"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he was watching football"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he was weak"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was weary after a long days work"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was with his lover"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he was worn out"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was worn out from a hard did"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he wason vacation"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he watched a heartbreaking movie"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he watched a sad movie"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he watched a sad scene in a movie"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he went on a date"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he wife asked for a divorce"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he won"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he won a contest"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he won the lottery"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he won the prize"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he won the race"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he worked a 10 hour shift"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he worked hard that day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="hed been up for 48 hours"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="hed had a long day"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="her dog had to be put down"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="her mom died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="hes a wuss"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="hes the boss"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="hes tired of your crap"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="hewas sad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="his accidentally cut his thumb"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his ankle hurt"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his baby daughter made him happy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="his best friend is hilarious"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his bonus came in"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his boss scolded him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his brother scared him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his cat jumped on him with her claws out"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his cat peed on his trousers"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his cat slid across the floor"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his coworkers are doing a poor job"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his dad died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his date looked beautiful"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his daughter did something funny"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his daughter made a funny face"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his daughter ran into the road"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his daughter wouldnt clean up her room"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his day was over"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his dog got loose"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his dog had passed away"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his dog is not listening to him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his dog peed on the rug"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his dog was running away"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his eyes were tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his father died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his father was ill"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his favorite band was on stage"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his favorite comedian told a joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his favorite song came on"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his favorite song was on"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his favorite song was playing"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his favorite team won"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his finger was caught in the saw"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his football team lost"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his friend fell down"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his friend told a funny joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his friend was so far away"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his girl made him"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his girlfriend broke up with him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his girlfriend cheated on him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his girlfriend dumped him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his girlfriend loved him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his girlfriend said yes"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his girlfriend surprised him at work"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his good buddy just told him a joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his grandmother died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his grandmother just died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his grandmother passed away"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his hit his toe"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his kids are funny"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his knees hurt"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his leg hurt"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his legs hurt"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his legs were getting tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his legs were nowhere to be found"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his legs were tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his legs were tired from hiking all weekend"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his life is a joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his life was pointless"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="his manager walked into the room"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his mind was cluttered"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his mom passed away"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his mom was sick"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his neighbor just got his car stuck in the culvert"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his only son had died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his parents did not buy him what he wanted"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his parents died in an accident"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his pet died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his pet dog died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his pet hamster died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his phone fell in the toilet"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his pie was wet"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his portion of food was small"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his sister had cancer"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his son broke a glass"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his son brought him a gift"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his son fell and scraped his knee"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his son had not taken out the trash"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his team lost"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his team messed up"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his team was winning"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his team won"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his wife asked him to"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his wife died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his wife had on a new dress"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his wife left him for another woman"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his wife show him her underwear"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his wife was about to back into the garage"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his work day was done"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his work day was finished"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="his work was finished"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="in was night"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it finally started raining"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it had been a long day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it isnt socially acceptable to punch your wife"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was a beautiful day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was easier to make the shot"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="it was end of the day at work"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was four in the morning"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was going to be another one of those days"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was his day off"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was his wedding"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was late"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was late at night"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was night"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was polite"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was still hours before lunch"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was sunday"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was the end of the day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="it was the funniest joke he ever heard"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="it was the weekend and he didnt have to get up early in the morning"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="it was weekend"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="jake punched the wall and hurt himself"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="john made him angry"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="joy was late again"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="life is sad sometimes"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="life no longer had meaning and his was purposeless"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="life sucks"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="life was being repetitive"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="like me he is terrified easily"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="lisa made him so mad"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="lucys antics were hilarious"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="mad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="melanie called him back"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="men at work came on the radio"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="michelle looked so pretty and soft music was playing"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="mike laughed at his joke"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="no one could hear him"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="no one gave him the support and mental health resources that he needed"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="no one reached out to help him when he showed signs of depression"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="nothing was going his way"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="of a joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="of a joke he heard"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="of a song that brings back memories"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="of a tense situation"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="of a tv show he was watching"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="of bullying"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="of the background noise"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="of the funny joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="of the loud noise"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="of the news"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="of the smell"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="of the snake"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="of the water puddle"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="of these damn onions"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="sara fell"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="sarah asked him to"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="scott hasnt learned to use an indoor voice"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="she missed him so much"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="she saw a spider"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="she was dizzy"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="she was happy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="she was scared"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="she was watching a dog video"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="simon told him to"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="somebody just told him bad news"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="someone cut him off in traffic"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="someone died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="someone just said something stupid which lacked understanding of basic knowledge"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="someone made him happy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="someone told a funny joke"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="someone was attacking him"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="someone was in danger"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="someone was not listening to him"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="something scared him"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="something was hilarious"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="standing was no longer an option"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="steve beat him once again at fantasy football"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="that is how he talks"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the band was playing his favorite song"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the boat was sinking"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the car hit the lady"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the cat startled him"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="the conversation was tiring"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="the cop put away his gun"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the cough medicine had codeine in it"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the day was exhausting"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="the driver made him mad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="the fan was too loud"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the he felt he could no longer go on"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="the hurdle was in his lane"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the job was finished"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the light stayed green"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the masked man scared him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="the mouse ran by"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the mouse startled him"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="the movie scared him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="the music was awesome"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="the music was rocking"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="the next door neighbor was being too loud"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the pain couldnt be alleviated any other way"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="the pain was unbearable"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="the patriots regained the lead"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="the pointer sisters told him to"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the repairs on his car doubled what he expected to pay"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="the snake surprised him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="the story was funny"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the stranger said hello"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the summer of george was ruined"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the task required him to"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the taxi didnt stop"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the test was over"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the tsunami engulfed the beach and threatened his hotel"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="the waiter brought the wrong order"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="the wall said something negative about his birth mother"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="the woman far away and couldnt hear him"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the worst part was over"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="there are no tears just dreams"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="there was a load sound"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="there was a maniac in his house"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="there was a puddle on the street"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="there was a spider"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="there was nothing left to live for"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="they couldnt hear him"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="they lost the game"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="they told him he was fine"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="they were far"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="this was his favorite song"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="was a wimp"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="was depressed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="was dodging a car"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="was frustratednwas frustrated"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="was sad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="was scared by his friend surprise"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="why not"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="with his sister"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="angry"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="because he was happy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="because he was sad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="fun"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="happy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he dropped something on his toe"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he enjoyed dancing"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he failed his exam"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he felt defeated"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he felt he wasnt heard"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he got a promotion"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he had a long day"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he had depression"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he had the day off"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he heard something funny"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he hit his thumb with the hammer"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he liked the joke"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he liked the music"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he liked the song"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he loved to dance"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he received a compliment"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a snake"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he saw something funny"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was angry at himself"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was deep in thought"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was disappointed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was done with work"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was drunk"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was fed up"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was feeling good"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was furious"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was hurt"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was in a good mood"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was in pain"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was joyful"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was lonely"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was nervous"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was on a trampoline"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was pissed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was pleased"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was thinking"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was tired from working all day"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was very tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his back hurt"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his cat died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his dog ran away"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his girlfriend left him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his mom died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his mother died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="his work for the day was done"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="she was mad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="something was funny"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="the movie was sad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="was upset"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="because he was tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he didnt understand"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he heard a joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he hit his thumb with a hammer"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he lost his temper"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a mouse"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was amused"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was tired of standing"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his feet were tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="it was funny"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="sad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="she was tired"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="the day was over"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he wanted to"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he was afraid"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was content"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was relieved"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was sleepy"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was suicidal"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="his feet hurt"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="his wife left him"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="the movie was funny"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he got scared"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he hurt himself"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was frightened"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="his dog died"]=2
+d1bLong$causeCode[d1bLong$freeResponses=="because he was mad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he heard a funny joke"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="heard a funny joke"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="he saw a spider"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was unhappy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was exhausted"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was annoyed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he stubbed his toe"]=4
+d1bLong$causeCode[d1bLong$freeResponses=="he was excited"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was bored"]=3
+d1bLong$causeCode[d1bLong$freeResponses=="the joke was funny"]=5
+d1bLong$causeCode[d1bLong$freeResponses=="he was startled"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was frustrated"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was scared"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was upset"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was depressed"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was mad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was sad"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was happy"]=1
+d1bLong$causeCode[d1bLong$freeResponses=="he was angry"]=1                   
+d1bLong$causeCode[d1bLong$freeResponses=="he was tired"]=4
+
+# 1 = emotion
+# 2 = upstream cause of emotion
+# 3 = non-emotion mental state (e.g. belief)
+# 4 = physical state (e.g. tiredness, pain)
+# 5 = enabling factor (e.g. was in dance class), or cause of non-emotion desire
+
+
+
+
+#ggplot(d1bLong, aes(x=causeCodeFactor)) + geom_histogram(aes(fill=causeCodeFactor), binwidth=1, origin=-0.5, colour="black") + xlab("Emotion Explanation?") + ylab("Number of Responses") + facet_wrap(~action, ncol=4) + guides(fill=FALSE) + theme_bw()
+
+
+
+# other coder
+d1b_otherCoder <- read.csv('Data/1b_coding.csv', header=T)
+colnames(d1b_otherCoder)[5:9] = c("Code1", "Code2", "Code3", "Code4", "Code5")
+d1b_otherCoder$Code1[is.na(d1b_otherCoder$Code1)] <- 0
+d1b_otherCoder$Code2[is.na(d1b_otherCoder$Code2)] <- 0
+d1b_otherCoder$Code3[is.na(d1b_otherCoder$Code3)] <- 0
+d1b_otherCoder$Code4[is.na(d1b_otherCoder$Code4)] <- 0
+d1b_otherCoder$Code5[is.na(d1b_otherCoder$Code5)] <- 0
+d1b_otherCoder$Code = 1*(d1b_otherCoder$Code1==1) + 2*(d1b_otherCoder$Code2==1) + 3*(d1b_otherCoder$Code3==1) + 4*(d1b_otherCoder$Code4==1) + 5*(d1b_otherCoder$Code5==1)
+
+library(irr)
+kappa2(cbind(d1bLong$causeCode, d1b_otherCoder$Code), "unweighted")
+
+d1bLong$causeCodeCombined = d1bLong$causeCode
+d1bLong$causeCodeCombined[d1bLong$causeCode!=d1b_otherCoder$Code]=NA
+
+d1bLong$causeCodeFactor = factor(d1bLong$causeCodeCombined, levels=c(1,2,3,4,5), labels=c("Emotion", "Cause of Emotion", "Mental state", "Physical state", "Situation"))
+
+
+countTable = table(d1bLong$action, d1bLong$causeCodeFactor)
+countProportion = as.vector(countTable / rowSums(countTable) * 100)
+
+```
+
+```{r d1b-plot, echo=FALSE, fig.width=6, fig.height=5}
+
+d1bSum = data.frame(action = factor(rep(c("cried", "cursed", "danced", 
+                                          "frowned", "jumped",
+                                          "killed\nhimself", "laughed", 
+                                          "punched\nthe wall", 
+                                          "relaxed", "sat down", 
+                                          "screamed", "sighed", "slept",
+                                          "smiled", "yelled"), 5), 
+                                    levels = c("punched\nthe wall", 
+                                               "frowned", "screamed",
+                                               "yelled", "cursed", "jumped", 
+                                               "smiled", "sighed", 
+                                               "danced", "cried",
+                                               "killed\nhimself", 
+                                               "laughed", "relaxed", 
+                                               "sat down", "slept")),
+                    code = factor(rep(c("Emotion", "Cause of\nEmotion", 
+                                        "Mental\nstate", "Physical\nstate", 
+                                        "Situation"), each=15),
+                                  levels = c("Emotion", "Cause of\nEmotion",
+                                             "Physical\nstate","Mental\nstate", 
+                                             "Situation")),
+                   proportion = countProportion
+                   #as.vector(table(d1bLong$action, d1bLong$causeCodeFactor))
+                   )
+
+d1bSumReorder = data.frame(rbind(subset(d1bSum,d1bSum$code=="Emotion"), 
+                     subset(d1bSum,d1bSum$code=="Cause of\nEmotion"), 
+                     subset(d1bSum,d1bSum$code=="Physical\nstate"), 
+                     subset(d1bSum,d1bSum$code=="Mental\nstate"), 
+                     subset(d1bSum,d1bSum$code=="Situation")))
+
+cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") 
+#"#999999", 
+
+ggplot(data=d1bSumReorder, aes(x=action, y=proportion, fill=code) ) + geom_bar(stat="identity") + ylab("Proportion") + xlab("Action") + scale_fill_manual(name="Type", values=cbPalette) + theme_bw() + theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=12), axis.title.x = element_text(size=14), axis.title.y = element_text(size=14), legend.position="top", legend.text = element_text(size=12), legend.title = element_text(size=12))
+
+# pdf: 6 x 5
+# 500 x 500
+
+#sum(subset(d1bSum,d1bSum$code=="Emotion")$proportion)/1500
+#sum(subset(d1bSum,d1bSum$code=="Cause of\nEmotion")$proportion)/1500
+#sum(subset(d1bSum,d1bSum$code=="Physical\nstate")$proportion)/1500
+#sum(subset(d1bSum,d1bSum$code=="Mental\nstate")$proportion)/1500
+#sum(subset(d1bSum,d1bSum$code=="Situation")$proportion)/1500
+```
+
+
+
+
+
+```{r d2-preamble, echo=FALSE, eval=TRUE}
+
+#table(d2.wide$gender)
+#table(d2.wide$nativeLanguage)
+
+d2 <- processData(d2.wide, variableList = c("order", "behaviorID", "behaviorType", "behavior",
+                                            "reactionTime", 
+                                            "likelihoodRatingsBeliefRaw",
+                                            "likelihoodRatingsDesireRaw",
+                                            "likelihoodRatingsEmotionRaw",
+                                            "likelihoodRatingsSituationRaw"),
+                  numberLogicalVector = c(TRUE, TRUE, FALSE, FALSE, rep(TRUE,5)),
+                  idVarList = c("workerid", "gender", "age"),
+                  numTrials = 20)
+colnames(d2) <- c("workerid", "gender", "age", "order", "behaviorID", "behaviorType", "behavior",
+                  "reactionTime",  "belief", "desire",  "emotion", "situation")
+
+```
+
+
+
+
+```{r d2-kmeans-analysis, echo=FALSE, eval=FALSE}
+## -- clusterboot shows that a 4 cluster solution is stable (whereas a 5 cluster solution has many clusters that are "dissolved"), see; http://www.r-bloggers.com/bootstrap-evaluation-of-clusters/ and http://www.inside-r.org/packages/cran/fpc/docs/clusterboot
+#library(fpc)
+#cboot <- clusterboot(d5[9:12],B=100, clustermethod = kmeansCBI, krange=c(4))
+#cboot$result$partition
+#cboot$result$result$centers
+#cboot$bootmean
+#cboot$bootbrd
+
+
+
+numClust = 4
+maxBootIter = 100
+clusterCenters1 = matrix(rep(NA,4*maxBootIter),nrow=maxBootIter,ncol=4)
+clusterCenters2 = matrix(rep(NA,4*maxBootIter),nrow=maxBootIter,ncol=4)
+clusterCenters3 = matrix(rep(NA,4*maxBootIter),nrow=maxBootIter,ncol=4)
+clusterCenters4 = matrix(rep(NA,4*maxBootIter),nrow=maxBootIter,ncol=4)
+
+# Feed one random boot iteration, so that we can match clusters across runs
+clusterCenters1[1,] = c(26.546366, 79.443609, 19.804511,  37.85213)
+clusterCenters2[1,] = c(24.706000, 19.272000, 84.504000,  56.71800)
+clusterCenters3[1,] = c( 4.928261,  7.115217,  7.421739,  87.19565)
+clusterCenters4[1,] = c(56.269891, 64.110764, 66.012480,  60.88924)
+for(bootIter in c(2:maxBootIter)) {
+  d5boot <- d5[sample(nrow(d5), nrow(d5), replace = TRUE, prob=NULL),]
+  thisKmeans = kmeans(d5boot[9:12],numClust)
+  
+  #thisKmeans$centers
+  # sort clusters
+  currentAssignment = rep(0,numClust)
+  distToCenter = matrix(rep(0,numClust*numClust),nrow=numClust,ncol=numClust)
+  for(thisCenter in c(1:numClust)) {
+    if(bootIter>2) {
+      distToCenter[thisCenter,] = c(sum((thisKmeans$centers[thisCenter,] - 
+                              colMeans(clusterCenters1[1:(bootIter-1),]) )^2),
+                     sum((thisKmeans$centers[thisCenter,] - 
+                            colMeans(clusterCenters2[1:(bootIter-1),]) )^2),
+                     sum((thisKmeans$centers[thisCenter,] - 
+                            colMeans(clusterCenters3[1:(bootIter-1),]) )^2),
+                     sum((thisKmeans$centers[thisCenter,] - 
+                            colMeans(clusterCenters4[1:(bootIter-1),]) )^2))
+    } else {
+      distToCenter[thisCenter,] = c(sum((thisKmeans$centers[thisCenter,] - 
+                              (clusterCenters1[1:(bootIter-1),]) )^2),
+                     sum((thisKmeans$centers[thisCenter,] - 
+                            (clusterCenters2[1:(bootIter-1),]) )^2),
+                     sum((thisKmeans$centers[thisCenter,] - 
+                            (clusterCenters3[1:(bootIter-1),]) )^2),
+                     sum((thisKmeans$centers[thisCenter,] - 
+                            (clusterCenters4[1:(bootIter-1),]) )^2))
+    }
+  }
+  
+  
+  currentAssignment = apply(distToCenter,1,which.min)
+  #distToCenter[i,j] is the distance from the current boot candidate i to the existing clusters j
+  if(!(1 %in% currentAssignment) | !(2 %in% currentAssignment) | !(3 %in% currentAssignment) | !(4 %in% currentAssignment)) { 
+    # nontrivial cluster assignment... print ("Error") 
+    print("I got here")
+    print(bootIter)
+    missingValue = (!(1 %in% currentAssignment))*1 + (!(2 %in% currentAssignment))*2 +
+      (!(3 %in% currentAssignment))*3 + (!(4 %in% currentAssignment))*4
+      
+    # sigh there's probably a better way to do this
+    for(i in c(1:3)) {
+      for(j in c((i+1):4)) {
+        if(currentAssignment[i]==currentAssignment[j]) {
+          combiA = distToCenter[i,currentAssignment[i]] + distToCenter[j,missingValue]
+          combiB = distToCenter[i,missingValue] + distToCenter[j,currentAssignment[j]]
+          if(combiA < combiB) {
+            currentAssignment[j] = missingValue
+          } else {
+              currentAssignment[i] = missingValue
+          }
+        }
+      }
+    }
+  } # end nontrivial cluster assignment
+  
+  for(thisCenter in c(1:numClust)) {
+    if(which(currentAssignment==1)==thisCenter) {
+      clusterCenters1[bootIter,] = thisKmeans$centers[thisCenter,]
+    } else if(which(currentAssignment==2)==thisCenter) {
+      clusterCenters2[bootIter,] = thisKmeans$centers[thisCenter,]
+    } else if(which(currentAssignment==3)==thisCenter) {
+      clusterCenters3[bootIter,] = thisKmeans$centers[thisCenter,]
+    } else {
+      clusterCenters4[bootIter,] = thisKmeans$centers[thisCenter,]
+    }
+  }
+}
+
+
+#cluster means are:
+
+# cluster 1
+#colMeans(clusterCenters1)
+  # 27.11355 78.94044 20.35874 39.04300
+sort(clusterCenters1[,1])[50] # 26.73615
+sort(clusterCenters1[,1])[5]; sort(clusterCenters1[,1])[95]  #21.1716, 33.01623
+sort(clusterCenters1[,2])[50] # 79.52882
+sort(clusterCenters1[,2])[5]; sort(clusterCenters1[,2])[95] # 73.45598 82.16169
+sort(clusterCenters1[,3])[50] # 20.0514
+sort(clusterCenters1[,3])[5]; sort(clusterCenters1[,3])[95] # 16.59756 24.66914
+sort(clusterCenters1[,4])[50] # 38.66667
+sort(clusterCenters1[,4])[5]; sort(clusterCenters1[,4])[95] # 31.99774 47.11538
+
+#colMeans(clusterCenters2)
+
+sort(clusterCenters2[,1])[50] # 23.59016
+sort(clusterCenters2[,1])[5]; sort(clusterCenters2[,1])[95] # 18.70093 33.79562
+sort(clusterCenters2[,2])[50] # 20.50501
+sort(clusterCenters2[,2])[5]; sort(clusterCenters2[,2])[95] # 16.81154 29.28224
+sort(clusterCenters2[,3])[50] # 83.81262
+sort(clusterCenters2[,3])[5]; sort(clusterCenters2[,3])[95] # 72.71776 85.92258
+sort(clusterCenters2[,4])[50] # 56.08679
+sort(clusterCenters2[,4])[5]; sort(clusterCenters2[,4])[95] # 31.48261 60.68277
+
+#colMeans(clusterCenters3)
+
+sort(clusterCenters3[,1])[50] # 4.801762
+sort(clusterCenters3[,1])[5]; sort(clusterCenters3[,1])[95] # 3.950644 5.707317
+sort(clusterCenters3[,2])[50] # 6.942857
+sort(clusterCenters3[,2])[5]; sort(clusterCenters3[,2])[95] # 5.696347 8.109589
+sort(clusterCenters3[,3])[50] # 7.232848
+sort(clusterCenters3[,3])[5]; sort(clusterCenters3[,3])[95] # 6.202797 8.428571
+sort(clusterCenters3[,4])[50] # 87.65831
+sort(clusterCenters3[,4])[5]; sort(clusterCenters3[,4])[95] # 85.71783 90.54649
+
+#colMeans(clusterCenters4)
+
+sort(clusterCenters4[,1])[50] # 57.05778
+sort(clusterCenters4[,1])[5]; sort(clusterCenters4[,1])[95] # 46.10759 63.06886
+sort(clusterCenters4[,2])[50] # 63.5938
+sort(clusterCenters4[,2])[5]; sort(clusterCenters4[,2])[95] # 50.01616 67.15514
+sort(clusterCenters4[,3])[50] # 66.60992
+sort(clusterCenters4[,3])[5]; sort(clusterCenters4[,3])[95] # 61.1874 76.10759
+sort(clusterCenters4[,4])[50] # 61.13428
+sort(clusterCenters4[,4])[5]; sort(clusterCenters4[,4])[95] # 54.41628 72.89265
+
+
+```
+
+
+
+
+```{r d2-plotting-centroids, echo=FALSE, fig.width=10, fig.height=6}
+
+d2sum = summarySE(d2, measurevar = c("belief"), groupvars = c("behaviorID", "behaviorType", "behavior"))
+colnames(d2sum)[5] = c("value")
+d2sum$explanationType = "Belief"
+d2sum1 = summarySE(d2, measurevar = c("desire"), groupvars = c("behaviorID", "behaviorType", "behavior"))
+colnames(d2sum1)[5] = c("value")
+d2sum1$explanationType = "Desire"
+d2sum = rbind(d2sum, d2sum1)
+d2sum1 = summarySE(d2, measurevar = c("emotion"), groupvars = c("behaviorID", "behaviorType", "behavior"))
+colnames(d2sum1)[5] = c("value")
+d2sum1$explanationType = "Emotion"
+d2sum = rbind(d2sum, d2sum1)
+d2sum1 = summarySE(d2, measurevar = c("situation"), groupvars = c("behaviorID", "behaviorType", "behavior"))
+colnames(d2sum1)[5] = c("value")
+d2sum1$explanationType = "Situation"
+d2sum = rbind(d2sum, d2sum1)
+
+d2sum$ci.u = d2sum$value + d2sum$ci
+d2sum$ci.l = d2sum$value - d2sum$ci
+d2sum<-d2sum[,-c(8)]
+
+
+d2sumPrototype = data.frame(behaviorID = rep(c(-1,-2,-3,-4), each=4),
+                            behaviorType = rep(c("Prototype", "Prototype",
+                                                 "Prototype", "Prototype"), each=4),
+                             behavior = rep(c("Prototype: Intentional Action",
+                                              "Prototype: Expressions",
+                                              "Prototype: Unintentional",
+                                              "Prototype: Ambiguous"), each=4),
+                             N = rep(NA,16),
+                             value = c(26.73615, 79.52882, 20.0514, 38.66667,
+                                       23.59016, 20.50501, 83.81262, 56.08679,
+                                       4.801762, 6.942857, 7.232848, 87.65831,
+                                       57.05778, 63.5938, 66.60992, 61.13428),
+                             sd = rep(NA,16),
+                             se = rep(NA,16),
+                             ci.u = c(33.01623, 82.16169, 24.66914, 47.11538,
+                                      33.79562, 29.28224, 85.92258, 60.68277,
+                                      5.707317, 8.109589, 8.428571, 90.54649,
+                                      63.06886, 67.15514, 76.10759, 72.89265),
+                             ci.l = c(21.1716, 73.45598, 16.59756, 31.99774,
+                                      18.70093, 16.81154, 72.71776, 31.48261,
+                                      3.950644, 5.696347, 6.202797, 85.71783,
+                                      46.10759, 50.01616, 61.1874, 54.41628),
+                             explanationType = rep(c("Belief", "Desire", 
+                                                     "Emotion", "Situation"), 4))
+
+d2sum<-rbind(d2sum, d2sumPrototype)
+d2sum$Prototype = factor(1 - 0.5*(d2sum$behaviorType == "Prototype"))
+
+d2sum$cluster = c(rep(c(1,1,4,1,4,1,2,2,2,2,2,2,3,3,3,3,3,1,4,4),4), rep(c(1,2,3,4),each=4))
+
+d2sum$behaviorReordered = factor(d2sum$behavior, 
+                                 levels=c("Prototype: Intentional Action", 
+                                          "watered his new plants",
+                                          "read a book", "stole a pound of peaches", 
+                                          "drove above the speed limit", "bought a drink", "",
+                                          "Prototype: Expressions", "laughed", "smiled", "cried",
+                                          "jumped up and down", "yelled loudly", "danced",
+                                          "Prototype: Unintentional", "stubbed his toe", 
+                                          "snored in his sleep", "fell down", "won the lottery",
+                                          "yawned during a lecture", " ",
+                                          "Prototype: Ambiguous", 
+                                          "bought a round of drinks for everyone", 
+                                          "interrupted his mother", "ignored Greg's arguments",
+                                          "invited Sue to have lunch"),
+                                 labels=c("Prototype:\nIntentional", 
+                                          "watered his\nnew plants",
+                                          "read a book", "stole a pound\nof peaches", 
+                                          "drove above\nthe speed limit", "bought a drink", "",
+                                          "Prototype:\nExpressions", "laughed", "smiled", "cried",
+                                          "jumped\nup and down", "yelled loudly", "danced",
+                                          "Prototype:\nUnintentional", "stubbed his toe", 
+                                          "snored in\nhis sleep", "fell down", "won the lottery",
+                                          "yawned during\na lecture", " ",
+                                          "Prototype:\nAmbiguous", 
+                                          "bought a round of\ndrinks for everyone", 
+                                          "interrupted\nhis mother", "ignored Greg's\narguments",
+                                          "invited Sue\nto have lunch"))
+
+d2sum$explanationTypeFactor = factor(d2sum$explanationType,
+                                     levels=c("Belief", "Desire", "Emotion", "Situation"),
+                                     labels=c("Belief  ", "Desire  ", "Emotion  ", "Situation  "))
+
+thisPlot = 
+  ggplot(d2sum, aes(x=explanationTypeFactor, y=value, fill=explanationTypeFactor)) + 
+  geom_rect(
+    data=subset(d2sum, d2sum$Prototype==0.5), 
+    xmin=as.numeric(d2sum$explanationTypeFactor[[1]])-1, 
+    xmax=as.numeric(d2sum$explanationTypeFactor[[61]])+1, 
+    ymin=-Inf, ymax=Inf, 
+    alpha = 0.2, fill = 'grey') +
+  geom_bar(aes(alpha=Prototype), position=position_dodge(), stat="identity") +
+  geom_errorbar(aes(ymin=ci.u, ymax=ci.l), width=.2, position=position_dodge(.9)) +
+  facet_wrap(~behaviorReordered, ncol=7, drop=FALSE) + 
+  ylab("Likelihood Ratings") + 
+  xlab("Explanation Type") + 
+  scale_fill_manual(name="Explanation Type", values=cbPalette) + 
+  scale_alpha_manual(guide=FALSE, values=c(0.8, 1.0)) + 
+  theme_bw() + theme(axis.text.x  = element_blank(), #element_text(angle=90, vjust=0.5, size=12), 
+                     axis.ticks.x = element_blank(),
+                     axis.title.x = element_blank(), #element_text(size=14), 
+                     axis.title.y = element_text(size=16, vjust=1), 
+                     panel.grid.minor.x=element_blank(),
+                     panel.grid.major.x=element_blank(),
+                     panel.grid.minor.y=element_blank(),
+                     panel.grid.major.y=element_blank(),
+                     legend.position="top", legend.text = element_text(size=12), 
+                     legend.title = element_text(size=12),
+                     strip.text.x = element_text(size=10),
+                     strip.background = element_rect(fill="#FFFFFF"))
+
+# this hack from: http://stackoverflow.com/questions/30372368/adding-empty-graphs-to-facet-wrap-in-ggplot2
+library(gridExtra)
+g <- ggplotGrob(thisPlot)
+## remove empty panels
+# names(g$grob)
+g$grobs[names(g$grobs) %in% c("panel7", "strip_t7", "axis_l7", "axis_b7",
+                              "panel21", "strip_t21", "axis_l21", "axis_b21")] <- NULL
+## remove them from the layout
+#g$layout$name
+g$layout <- g$layout[!(g$layout$name %in% c("panel-7", "strip_t-7", "axis_l-7", "axis_b-7",
+                                            "panel-21", "strip_t-21", "axis_l-21", "axis_b-21")),]
+grid.newpage()
+grid.draw(g)
+# 10 by 6
+```
+
+
+
+```{r d2-mds-plot, echo=FALSE, fig.width=8, fig.height=6}
+
+d2w = summarySE(d2, measurevar = c("belief"), groupvars = c("behaviorID", "behaviorType", "behavior"))
+colnames(d2w)[5] = c("belief")
+d2w<-d2w[,c(1:3,5)]
+d2w$desire = summarySE(d2, measurevar = c("desire"), groupvars = c("behaviorID", "behaviorType", "behavior"))$desire
+d2w$emotion = summarySE(d2, measurevar = c("emotion"), groupvars = c("behaviorID", "behaviorType", "behavior"))$emotion
+d2w$situation = summarySE(d2, measurevar = c("situation"), groupvars = c("behaviorID", "behaviorType", "behavior"))$situation
+
+
+
+prototypeClusters = data.frame(behavior=c("+","*","^","x"),
+                               belief = c(26.73615, 23.59016, 4.801762, 57.05778),
+                               desire = c(79.52882, 20.50501, 6.942857, 63.5938),
+                               emotion = c(20.0514, 83.81262, 7.232848, 66.60992),
+                               situation = c(38.66667, 56.08679, 87.65831, 61.13428),
+                               cluster=c(1,2,3,4))
+
+
+# assigning means of each item to clusters
+currentAssignment = rep(0,nrow(d2w))
+distToCenter = matrix(rep(0,nrow(d2w)*4),nrow=nrow(d2w),ncol=4)
+  for(thisRow in c(1:nrow(d2w))) {
+    for(thisCluster in c(1:4)) {
+      distToCenter[thisRow,thisCluster] = sum(c(
+        (d2w$belief[thisRow] - prototypeClusters$belief[thisCluster])^2,
+        (d2w$desire[thisRow] - prototypeClusters$desire[thisCluster])^2,
+        (d2w$emotion[thisRow] - prototypeClusters$emotion[thisCluster])^2,
+        (d2w$situation[thisRow] - prototypeClusters$situation[thisCluster])^2))
+    }
+  }
+  currentAssignment = apply(distToCenter,1,which.min)
+  minDistancesToCenter = apply(distToCenter,1,min)
+
+d2w$cluster = currentAssignment
+
+
+
+itemDistances = rbind(d2w[,c(3,4:8)], prototypeClusters)
+
+
+distances <- dist(itemDistances[,2:5]) # euclidean distances between the rows
+mdsfit <- cmdscale(distances,eig=TRUE, k=2) # k is the number of dim
+dataPlot = data.frame(x = mdsfit$points[,1],
+                      y = mdsfit$points[,2],
+                      labels = itemDistances$behavior,
+                      cluster = itemDistances$cluster)
+
+rotateTheta=pi*(5/6 + 1/6)
+dataPlot$newX = cos(rotateTheta)*dataPlot$x + sin(rotateTheta)*dataPlot$y
+dataPlot$newY = -1*(sin(rotateTheta)*dataPlot$x - cos(rotateTheta)*dataPlot$y)
+
+ggplot(dataPlot[1:20,], aes(x = newX, y = newY, label=labels, color=factor(cluster))) + 
+  geom_point(data=dataPlot[c(21:24),], aes(x=newX,y=newY), size=3) +
+  geom_text(size = 5) +
+  #ylim(-41.2,53.9) + xlim(-76,51.5) +
+  scale_color_discrete(guide=FALSE) + xlab("") + ylab("") + theme_bw() + 
+  theme(axis.text.x  = element_blank(),
+        axis.text.y  = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank())
+# 8 by 6
+
+```
+
+(The final mds plot is slightly different from the one in the paper; I think I generated it with a different seed last time?)
+
+
+

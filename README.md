@@ -3,6 +3,23 @@ Repository for Shakespeare project (Lay theories of emotion --> behavior). Incl.
 
 
 
+This repository contains materials for the following paper:
+
+Ong, D. C., Zaki, J., & Goodman, N. D. (under review). Emotions in lay explanations of behavior.
+
+
+This repository is maintained by Desmond Ong. Questions, comments, requests for clarification or replication, etc, should be directed to desmond (dot) ong (at) stanford (dot) edu
+
+
+
+### Analysis code
+
+Analysis code is provided in cogsciAnalysis.Rmd (a R Markdown document). 
+
+The file contains all the R code necessary to replicate the analyses reported in the paper.
+
+
+
 ### Sample Experiments
 
 A sample of our experiments is also included in the repository. 
