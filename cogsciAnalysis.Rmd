@@ -1751,8 +1751,8 @@ clusterCenters2[1,] = c(24.706000, 19.272000, 84.504000,  56.71800)
 clusterCenters3[1,] = c( 4.928261,  7.115217,  7.421739,  87.19565)
 clusterCenters4[1,] = c(56.269891, 64.110764, 66.012480,  60.88924)
 for(bootIter in c(2:maxBootIter)) {
-  d5boot <- d5[sample(nrow(d5), nrow(d5), replace = TRUE, prob=NULL),]
-  thisKmeans = kmeans(d5boot[9:12],numClust)
+  d2boot <- d2[sample(nrow(d2), nrow(d2), replace = TRUE, prob=NULL),]
+  thisKmeans = kmeans(d2boot[9:12],numClust)
   
   #thisKmeans$centers
   # sort clusters
@@ -1957,6 +1957,10 @@ d2sum$behaviorReordered = factor(d2sum$behavior,
 d2sum$explanationTypeFactor = factor(d2sum$explanationType,
                                      levels=c("Belief", "Desire", "Emotion", "Situation"),
                                      labels=c("Belief  ", "Desire  ", "Emotion  ", "Situation  "))
+
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") 
+ 
 
 thisPlot = 
   ggplot(d2sum, aes(x=explanationTypeFactor, y=value, fill=explanationTypeFactor)) + 
