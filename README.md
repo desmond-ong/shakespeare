@@ -1,6 +1,4 @@
-# shakespeare
 Repository for Shakespeare project (Lay theories of emotion --> behavior). Including Cogsci 2016.
----
 
 
 
