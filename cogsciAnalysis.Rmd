@@ -1651,6 +1651,10 @@ d1bLong$causeCodeFactor = factor(d1bLong$causeCodeCombined, levels=c(1,2,3,4,5),
 countTable = table(d1bLong$action, d1bLong$causeCodeFactor)
 countProportion = as.vector(countTable / rowSums(countTable) * 100)
 
+# emotion: 568 / 1427
+#colSums(countTable)
+#sum(colSums(countTable))
+
 ```
 
 ```{r d1b-plot, echo=FALSE, fig.width=6, fig.height=5}
