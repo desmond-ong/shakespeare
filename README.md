@@ -6,7 +6,7 @@ Repository for Shakespeare project (Lay theories of emotion --> behavior). Inclu
 
 ### For Cogsci 2016
 
-This [Github repository](https://github.com/desmond-ong/shakespeare/) contains materials for the following paper:
+This [Github page](http://desmond-ong.github.io/shakespeare/) ([repository](https://github.com/desmond-ong/shakespeare/)) contains materials for the following paper:
 
 Ong, D. C., Zaki, J., & Goodman, N. D. (2016). Emotions in lay explanations of behavior. *Proceedings of the Thirty-Eighth Annual Conference of the Cognitive Science Society*.
 
